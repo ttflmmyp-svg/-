@@ -1406,6 +1406,30 @@ body {
   overflow: hidden;
 }
 
+.washer-inside-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 22;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: opacity .36s ease;
+}
+
+.room-shell.cloth-inside-ready .washer-inside-scene {
+  opacity: 1;
+}
+
+.room-shell.cloth-inside-ready .generated-cloth {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .back-wall {
   position: absolute;
   left: 5%;
@@ -1826,19 +1850,19 @@ body {
   transition: transform .38s ease, opacity .24s ease;
 }
 
-.room-shell[data-room-step="basket"] .emotion-note {
+.room-shell.basket-input-ready .emotion-note {
   z-index: 38;
-  top: calc(6dvh + env(safe-area-inset-top));
-  bottom: auto;
+  top: auto;
+  bottom: calc(6.5dvh + env(safe-area-inset-bottom));
   transform: translate(-50%, 0);
   opacity: 1;
   pointer-events: auto;
-  transition-delay: .48s;
+  transition-delay: .08s;
 }
 
-.room-shell[data-room-step="basket"] .emotion-note textarea {
-  min-height: clamp(70px, 12dvh, 98px);
-  max-height: 16dvh;
+.room-shell.basket-input-ready .emotion-note textarea {
+  min-height: clamp(92px, 18dvh, 132px);
+  max-height: 22dvh;
 }
 
 .emotion-note label {
@@ -1879,6 +1903,40 @@ body {
   color: #56383f;
   font-size: clamp(15px, 4vw, 17px);
   font-weight: 950;
+  transition: opacity .2s ease;
+}
+
+.note-submit:disabled {
+  opacity: .5;
+  pointer-events: none;
+}
+
+/* API loading 指示器 */
+.api-loading {
+  display: none;
+  margin: .6em 0 0;
+  color: #7a5d6b;
+  text-align: center;
+  font-size: clamp(13px, 3.6vw, 15px);
+  font-weight: 900;
+}
+
+.api-loading.show {
+  display: block;
+}
+
+.api-loading span {
+  display: inline-block;
+  animation: loadingDots 1.2s steps(3, end) infinite;
+  overflow: hidden;
+  vertical-align: baseline;
+}
+
+@keyframes loadingDots {
+  0%   { width: 0; }
+  33%  { width: .55em; }
+  66%  { width: 1.1em; }
+  100% { width: 1.65em; }
 }
 
 .generated-cloth {
@@ -2073,7 +2131,9 @@ body {
   -webkit-user-drag: none;
   transform: translate(-50%, -50%) scale(.48) rotate(-2deg);
   transform-origin: 50% 62%;
-  filter: drop-shadow(0 1.6dvh 2.2dvh rgba(66, 47, 42, .18));
+  filter:
+    drop-shadow(0 1.7dvh 1.7dvh rgba(55, 38, 30, .24))
+    drop-shadow(0 .4dvh .6dvh rgba(110, 74, 52, .18));
   transition:
     left .72s cubic-bezier(.2, .78, .2, 1),
     top .72s cubic-bezier(.2, .78, .2, 1),
@@ -2085,10 +2145,58 @@ body {
 .room-shell[data-room-step="basket"] .basket-focus-prop,
 .room-shell[data-room-step="cloth"] .basket-focus-prop {
   left: 50%;
-  top: 56%;
-  width: min(82vw, 360px);
+  top: 63%;
+  width: min(46vw, 205px);
   opacity: 1;
+  pointer-events: auto;
   transform: translate(-50%, -50%) scale(1) rotate(0deg);
+}
+
+.room-shell.basket-focus-dismissed .basket-focus-prop {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(.88) rotate(0deg);
+  transition-duration: .3s;
+}
+
+.basket-focus-cue {
+  position: absolute;
+  left: 58%;
+  top: 36%;
+  z-index: 39;
+  width: clamp(22px, 6vw, 30px);
+  height: clamp(22px, 6vw, 30px);
+  border: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(255,255,255,.94) 0 18%, rgba(175, 255, 224, .72) 24% 48%, rgba(118, 246, 233, .18) 54%, transparent 72%);
+  box-shadow:
+    0 0 10px rgba(137, 255, 221, .58),
+    0 0 22px rgba(92, 236, 255, .22);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(.74);
+  animation: freshCue 1.7s ease-in-out infinite;
+}
+
+.room-shell[data-room-step="basket"]:not(.basket-focus-dismissed) .basket-focus-cue {
+  opacity: .72;
+  pointer-events: auto;
+}
+
+.room-shell.basket-input-ready .basket-focus-cue,
+.room-shell.basket-focus-dismissed .basket-focus-cue {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes freshCue {
+  50% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow:
+      0 0 14px rgba(137, 255, 221, .72),
+      0 0 28px rgba(92, 236, 255, .28);
+  }
 }
 
 .room-shell[data-room-step="basket"] .room-basket-layer,
@@ -2254,9 +2362,9 @@ body {
 }
 
 .generated-cloth {
-  left: 50%;
-  top: 50%;
-  width: 29%;
+  left: 37%;
+  top: 58%;
+  width: 24%;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -2291,8 +2399,8 @@ body {
 
 @keyframes clothToWasher {
   to {
-    transform: translate(135%, -136%) scale(.34) rotate(22deg);
-    opacity: .15;
+    transform: translate(62%, -16%) scale(.26) rotate(22deg);
+    opacity: 0;
   }
 }
 
@@ -2522,6 +2630,230 @@ body {
 .room-shell[data-room-step="detergent"] .room-hint,
 .room-shell.pouring-detergent .room-hint {
   bottom: calc(21dvh + env(safe-area-inset-bottom));
+}
+
+.detergent-bottle {
+  left: 71%;
+  top: 50%;
+  z-index: 32;
+  width: clamp(118px, 37vw, 176px);
+  min-width: 64px;
+  min-height: 64px;
+  display: block;
+  padding: 0;
+  touch-action: none;
+  cursor: pointer;
+  filter: drop-shadow(0 1.5dvh 1.8dvh rgba(51, 68, 98, .24));
+  transform: translate(-50%, -50%) scale(.86);
+  transition:
+    opacity .22s ease,
+    filter .18s ease,
+    transform .24s cubic-bezier(.2, .78, .2, 1),
+    left .24s ease,
+    top .24s ease;
+}
+
+.detergent-bottle img {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.detergent-bottle > span {
+  position: absolute;
+  left: 50%;
+  top: 72%;
+  max-width: 68%;
+  padding: .28em .58em;
+  border-radius: 999px;
+  background: rgba(255, 252, 239, .78);
+  color: #44658f;
+  font-size: clamp(9px, 2.45vw, 12px);
+  font-weight: 900;
+  line-height: 1.15;
+  text-align: center;
+  box-shadow: 0 .45dvh 1dvh rgba(64, 82, 104, .12);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.room-shell[data-room-step="detergent"] .detergent-bottle {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+  animation: detergentFloat 1.45s ease-in-out infinite;
+}
+
+.room-shell[data-room-step="detergent"] .detergent-bottle:after {
+  inset: 8% 22% 13%;
+  border-color: rgba(213, 255, 235, .62);
+  border-radius: 46%;
+  box-shadow: 0 0 22px rgba(111, 255, 213, .28);
+}
+
+.detergent-bottle.is-dragging {
+  filter: drop-shadow(0 2.2dvh 2.4dvh rgba(45, 61, 92, .34));
+  animation: none !important;
+  transform: translate(-50%, -50%) scale(1.08) rotate(-4deg);
+}
+
+.detergent-bottle.is-hot {
+  filter:
+    drop-shadow(0 1.7dvh 1.8dvh rgba(51, 68, 98, .24))
+    drop-shadow(0 0 18px rgba(255, 232, 112, .68));
+}
+
+.room-shell.pouring-detergent .detergent-bottle {
+  opacity: 0;
+  animation: none;
+  transform: translate(-50%, -50%) scale(.92);
+}
+
+.detergent-pour-frame {
+  position: absolute;
+  left: 59%;
+  top: 40%;
+  z-index: 33;
+  width: clamp(136px, 41vw, 196px);
+  height: auto;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 1.4dvh 1.8dvh rgba(54, 63, 94, .2));
+}
+
+.room-shell.pouring-detergent .detergent-pour-frame {
+  opacity: 1;
+}
+
+.detergent-pour-frame-top {
+  left: 55%;
+  top: 43%;
+  z-index: 48;
+  width: clamp(176px, 54vw, 258px);
+  transform: translate(-50%, -50%) scale(.96) rotate(-2deg);
+}
+
+.room-shell.pouring-detergent .detergent-pour-frame-top {
+  opacity: 1;
+  animation: pourFrameShow 1.55s ease both;
+}
+
+.room-shell.pouring-detergent .washer-inside-scene {
+  filter: brightness(.96) saturate(.96);
+}
+
+.detergent-target-glow {
+  position: absolute;
+  left: 49%;
+  top: 54%;
+  z-index: 24;
+  width: 31%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(circle, rgba(255, 238, 134, .42), rgba(255, 238, 134, .14) 42%, transparent 68%);
+  filter: blur(.2px);
+  transform: translate(-50%, -50%) scale(.84);
+  transition: opacity .16s ease, transform .18s ease;
+}
+
+.room-shell.detergent-target-hot .detergent-target-glow {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.detergent-gold-glow {
+  position: absolute;
+  left: 55%;
+  top: 45%;
+  z-index: 31;
+  width: 22%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle, rgba(255, 235, 111, .64), rgba(255, 223, 104, .2) 45%, transparent 72%);
+}
+
+.room-shell.pouring-detergent .detergent-gold-glow {
+  animation: detergentGlowPulse 1.25s ease-out forwards;
+}
+
+.washer-cloth-react {
+  position: absolute;
+  left: 50%;
+  top: 57%;
+  z-index: 29;
+  width: 22%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle at 46% 58%, rgba(116, 219, 231, .25), rgba(248, 122, 165, .16) 44%, transparent 68%);
+  transform: translate(-50%, -50%);
+}
+
+.room-shell.pouring-detergent .washer-cloth-react {
+  opacity: 1;
+  animation: washerClothShake .52s ease-in-out 3;
+}
+
+.detergent-drops {
+  left: 51%;
+  top: 43%;
+  z-index: 34;
+  width: 20%;
+  height: 20%;
+}
+
+.detergent-drops span {
+  background: linear-gradient(180deg, #fff8ce, #d3b0ff 46%, #92e5f3);
+  box-shadow: 0 0 10px rgba(255, 231, 102, .68);
+}
+
+.washer-foam {
+  left: 39%;
+  top: 48%;
+  z-index: 30;
+}
+
+@keyframes detergentGlowPulse {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.62); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); }
+}
+
+@keyframes pourFrameShow {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(.82) rotate(-8deg);
+  }
+  14% {
+    opacity: 1;
+  }
+  56% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.04) rotate(-1deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -52%) scale(.98) rotate(1deg);
+  }
+}
+
+@keyframes washerClothShake {
+  0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+  20% { transform: translate(-53%, -50%) rotate(-4deg); }
+  44% { transform: translate(-47%, -51%) rotate(4deg); }
+  68% { transform: translate(-52%, -49%) rotate(-3deg); }
 }
 
 /* Micro bubble transformation and recompose view. */

@@ -81,11 +81,13 @@
                 <img id="miniClothImage" src="../素材照片文件夹/1、迷茫衬衫.png?v=202606061932" alt="">
               </div>
               <button class="detergent-bottle" id="detergentBottle" type="button" aria-label="倒入洗涤剂">
-                <span class="bottle-cap"></span>
-                <span class="bottle-body">
-                  <b id="detergentLabel">慢慢来洗衣液</b>
-                </span>
+                <img id="detergentImage" src="./assets/detergent/frames/9418d7519b6c19f679208bad90ca0c21/frame_01.png?v=2026060707" alt="">
+                <span id="detergentLabel">慢慢来洗衣液</span>
               </button>
+              <img class="detergent-pour-frame" id="detergentPourFrame" src="./assets/detergent/frames/9418d7519b6c19f679208bad90ca0c21/frame_01.png?v=2026060707" alt="" draggable="false">
+              <div class="detergent-target-glow" id="detergentTargetGlow" aria-hidden="true"></div>
+              <div class="detergent-gold-glow" id="detergentGoldGlow" aria-hidden="true"></div>
+              <div class="washer-cloth-react" id="washerClothReact" aria-hidden="true"></div>
               <div class="detergent-drops" id="detergentDrops" aria-hidden="true">
                 <span></span><span></span><span></span>
               </div>
@@ -99,9 +101,12 @@
               <button class="line-hotspot" id="lineHotspot" type="button" aria-label="点击晾衣杆"></button>
             </div>
           </div>
+          <img class="washer-inside-scene" id="washerInsideScene" src="../衣服进洗衣机/微信图片_20260607034221_225_1677.png?v=2026060706" alt="衣服进入洗衣机后的状态">
+          <img class="detergent-pour-frame detergent-pour-frame-top" id="detergentPourFrameTop" src="./assets/detergent/frames/9418d7519b6c19f679208bad90ca0c21/frame_01.png?v=2026060707" alt="" draggable="false">
 
           <p class="room-hint" id="npcLine">点点脏衣篓，把今天放进去。</p>
           <img class="basket-focus-prop" id="basketFocusProp" src="../木桶/微信图片_20260607024905_167_1677.png?v=2026060704" alt="放大的脏衣篓">
+          <button class="basket-focus-cue" id="basketFocusCue" type="button" aria-label="继续点击脏衣篓"></button>
 
           <div class="emotion-note" id="emotionNote">
             <label for="emotionInput">今天想洗掉什么？</label>
@@ -110,6 +115,7 @@
               <span id="inputCount">0 / 120</span>
               <button class="note-submit" id="submitEmotion" type="button">放进去</button>
             </div>
+            <p class="api-loading" id="apiLoading">正在分析你的情绪<span>...</span></p>
             <p class="error" id="inputError"></p>
           </div>
 
@@ -167,6 +173,7 @@
     </section>
   </main>
 
+  <script src="api.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

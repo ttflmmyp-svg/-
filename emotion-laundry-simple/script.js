@@ -5,16 +5,25 @@ const dots = document.querySelectorAll("[data-dot]");
 const emotionInput = document.getElementById("emotionInput");
 const inputCount = document.getElementById("inputCount");
 const inputError = document.getElementById("inputError");
+const apiLoading = document.getElementById("apiLoading");
+const submitEmotionBtn = document.getElementById("submitEmotion");
 const miniCloth = document.getElementById("miniCloth");
+const washerInsideScene = document.getElementById("washerInsideScene");
 const npcLine = document.getElementById("npcLine");
 const roomShell = document.querySelector(".room-shell");
 const basketHotspot = document.getElementById("basketHotspot");
 const basketFocusProp = document.getElementById("basketFocusProp");
+const basketFocusCue = document.getElementById("basketFocusCue");
 const washerHotspot = document.getElementById("washerHotspot");
 const sinkHotspot = document.getElementById("sinkHotspot");
 const lineHotspot = document.getElementById("lineHotspot");
 const detergentBottle = document.getElementById("detergentBottle");
+const detergentImage = document.getElementById("detergentImage");
 const detergentLabel = document.getElementById("detergentLabel");
+const detergentPourFrame = document.getElementById("detergentPourFrameTop") || document.getElementById("detergentPourFrame");
+const detergentTargetGlow = document.getElementById("detergentTargetGlow");
+const detergentGoldGlow = document.getElementById("detergentGoldGlow");
+const washerClothReact = document.getElementById("washerClothReact");
 const microBubbleField = document.getElementById("microBubbleField");
 const microFlash = document.getElementById("microFlash");
 const cleanClothImage = document.getElementById("cleanClothImage");
@@ -28,6 +37,10 @@ const POP_SOUND_SRC = "../image/泡泡裂开声音.m4a";
 const BG_MUSIC_SRC = "../Tidy_Little_Victories.mp3";
 const clothAsset = fileName => `../素材照片文件夹/${fileName}?v=${CLOTH_ASSET_VERSION}`;
 const cleanAsset = fileName => `../新照片素材/${fileName}?v=${CLEAN_ASSET_VERSION}`;
+const washerInsideAsset = fileName => `../衣服进洗衣机/${fileName}?v=2026060706`;
+const DETERGENT_ASSET_VERSION = "2026060707";
+const detergentFrameAsset = (key, index) =>
+  `./assets/detergent/frames/${key}/frame_${String(index).padStart(2, "0")}.png?v=${DETERGENT_ASSET_VERSION}`;
 const bubbleAsset = fileName => `${BUBBLE_ASSET_PATH}${fileName}`;
 const bubblePopFrames = [
   "anim_bubble_pop_01.png",
@@ -46,6 +59,17 @@ const basketFocusFrames = [
   "5.png",
   "6.png"
 ].map(fileName => `../木桶/${fileName}?v=2026060705`);
+
+const detergentSetKeys = {
+  breakdown: "0201dce8a4caa55e5671463c05475283",
+  anger: "945434c52dfade93fc3829afdafcbd9e",
+  sadness: "87aa475ae35708bb46fbfdafa8724e88",
+  anxiety: "9418d7519b6c19f679208bad90ca0c21",
+  fatigue: "84175d094b93353950b314cba996e242",
+  confusion: "3c0bd9533f3b06478cfd8ff4678e5bca",
+  loneliness: "9c21a52f239282a13d126c4b96b431ab",
+  rumination: "e0308a70edb29fff7732fc21a1c522c6"
+};
 
 const bubblePresets = {
   large: {
@@ -92,6 +116,8 @@ const rules = [
     emoji: "🥼",
     asset: clothAsset("7、崩溃睡衣.png"),
     cleanAsset: cleanAsset("崩溃睡衣.png"),
+    washerInsideAsset: washerInsideAsset("微信图片_20260607034230_231_1677.png"),
+    detergentKey: detergentSetKeys.breakdown,
     detergentName: "先暂停洗衣液",
     softenerName: "没关系柔顺剂",
     bubbles: ["要炸了", "不管了", "绷不住", "裂开了", "受不了"],
@@ -105,6 +131,8 @@ const rules = [
     emoji: "🧦",
     asset: clothAsset("2、愤怒袜子.png"),
     cleanAsset: cleanAsset("愤怒袜子.png"),
+    washerInsideAsset: washerInsideAsset("微信图片_20260607034231_232_1677.png"),
+    detergentKey: detergentSetKeys.anger,
     detergentName: "消消气洗衣液",
     softenerName: "轻一点漂白剂",
     bubbles: ["凭什么", "忍够了", "气死了", "太离谱", "别惹我"],
@@ -118,6 +146,8 @@ const rules = [
     emoji: "🧣",
     asset: clothAsset("4、委屈毛衣.png"),
     cleanAsset: cleanAsset("委屈毛衣.png"),
+    washerInsideAsset: washerInsideAsset("微信图片_20260607034224_227_1677.png"),
+    detergentKey: detergentSetKeys.sadness,
     detergentName: "抱抱你洗衣液",
     softenerName: "不怪你柔顺剂",
     bubbles: ["好委屈", "没人懂", "没看见", "好难过", "想哭"],
@@ -131,6 +161,8 @@ const rules = [
     emoji: "👔",
     asset: clothAsset("1、迷茫衬衫.png"),
     cleanAsset: cleanAsset("迷茫衬衫.png"),
+    washerInsideAsset: washerInsideAsset("微信图片_20260607034221_225_1677.png"),
+    detergentKey: detergentSetKeys.anxiety,
     detergentName: "慢慢来洗衣液",
     softenerName: "先呼吸柔顺剂",
     bubbles: ["来不及", "完蛋了", "好慌", "要挂了", "救命"],
@@ -144,6 +176,8 @@ const rules = [
     emoji: "🧥",
     asset: clothAsset("3、疲惫外套.png"),
     cleanAsset: cleanAsset("疲惫外套.png"),
+    washerInsideAsset: washerInsideAsset("微信图片_20260607034223_226_1677.png"),
+    detergentKey: detergentSetKeys.fatigue,
     detergentName: "休息一下洗衣液",
     softenerName: "充充电柔顺剂",
     bubbles: ["好累", "没力气", "不想动", "没电了", "想躺着"],
@@ -157,6 +191,8 @@ const rules = [
     emoji: "👕",
     asset: clothAsset("5、迷茫围巾.png"),
     cleanAsset: cleanAsset("迷茫围巾.png"),
+    washerInsideAsset: washerInsideAsset("微信图片_20260607034228_230_1677.png"),
+    detergentKey: detergentSetKeys.confusion,
     detergentName: "走一步洗衣液",
     softenerName: "会清楚柔顺剂",
     bubbles: ["不知道", "卡住了", "没方向", "好迷茫", "怎么办"],
@@ -170,6 +206,8 @@ const rules = [
     emoji: "🧤",
     asset: clothAsset("6、孤独手套.png"),
     cleanAsset: cleanAsset("孤独手套.png"),
+    washerInsideAsset: washerInsideAsset("微信图片_20260607034226_228_1677.png"),
+    detergentKey: detergentSetKeys.loneliness,
     detergentName: "有人在洗衣液",
     softenerName: "陪陪你柔顺剂",
     bubbles: ["没人懂", "被忘了", "一个人", "没人陪", "好孤单"],
@@ -183,6 +221,8 @@ const rules = [
     emoji: "🧶",
     asset: clothAsset("8、内耗线团.png"),
     cleanAsset: cleanAsset("内耗毛线团.png"),
+    washerInsideAsset: washerInsideAsset("微信图片_20260607034227_229_1677.png"),
+    detergentKey: detergentSetKeys.rumination,
     isOverlay: true,
     detergentName: "别拧巴洗衣液",
     softenerName: "放过自己柔顺剂",
@@ -198,6 +238,8 @@ const fallbackRule = {
   emoji: "👕",
   asset: clothAsset("1、迷茫衬衫.png"),
   cleanAsset: cleanAsset("迷茫衬衫.png"),
+  washerInsideAsset: washerInsideAsset("微信图片_20260607034221_225_1677.png"),
+  detergentKey: detergentSetKeys.anxiety,
   detergentName: "慢慢来洗衣液",
   softenerName: "先呼吸柔顺剂",
   bubbles: ["今天有点重", "说不清楚", "先放一放", "慢慢来", "不用马上解决"],
@@ -373,7 +415,9 @@ const gameState = {
   sentenceCards: [],
   buildCards: [],
   composedSentence: "",
-  basketFocusTimer: null
+  basketFocusTimer: null,
+  apiStatus: "idle",
+  apiResult: null
 };
 
 function setScene(name) {
@@ -409,6 +453,7 @@ function setPanel(name) {
       drum: "回到洗衣机，让今天转一转。"
     };
     npcLine.textContent = hints[name] || "";
+    if (name === "detergent") resetDetergentBottlePosition();
     dots.forEach(dot => dot.classList.toggle("active", dot.dataset.dot === "wash"));
   }
 }
@@ -419,6 +464,7 @@ function setRoomStep(step) {
   roomShell.classList.remove("is-washing");
 
   if (step === "wide") {
+    roomShell.classList.remove("basket-focus-dismissed", "basket-input-ready");
     npcLine.textContent = "点点脏衣篓，把今天放进去。";
   }
   if (step === "basket") {
@@ -469,7 +515,9 @@ function resetWashProgress() {
   gameState.sentenceCards = [];
   gameState.buildCards = [];
   gameState.composedSentence = "";
-  roomShell.classList.remove("show-clean-result", "show-recompose", "micro-complete");
+  gameState.apiStatus = "idle";
+  gameState.apiResult = null;
+  roomShell.classList.remove("show-clean-result", "show-recompose", "micro-complete", "cloth-inside-ready", "pouring-detergent", "detergent-target-hot", "detergent-poured");
   const soapMeter = document.getElementById("soapMeter");
   const spinMeter = document.getElementById("spinMeter");
   if (soapMeter) soapMeter.style.width = "0%";
@@ -485,6 +533,17 @@ function prepareThrow() {
   const rule = gameState.analysis;
   const clothImage = document.getElementById("clothImage");
   const miniClothImage = document.getElementById("miniClothImage");
+  if (washerInsideScene) {
+    washerInsideScene.src = rule.washerInsideAsset;
+    washerInsideScene.alt = `${rule.cloth}进入洗衣机后的状态`;
+  }
+  if (detergentImage) {
+    detergentImage.src = detergentFrameAsset(rule.detergentKey, 1);
+    detergentImage.alt = rule.detergentName;
+  }
+  if (detergentPourFrame) {
+    detergentPourFrame.src = detergentFrameAsset(rule.detergentKey, 1);
+  }
   document.getElementById("clothEmoji").textContent = rule.emoji;
   document.getElementById("clothName").textContent = rule.cloth;
   clothImage.src = rule.asset;
@@ -496,6 +555,18 @@ function prepareThrow() {
 }
 
 function getMicroThoughtSet() {
+  // API 成功时优先使用 DeepSeek 返回的个性化文案
+  if (gameState.apiStatus === "success" && gameState.apiResult) {
+    const api = gameState.apiResult;
+    if (api.bubbleTexts && api.bubbleTexts.length && api.gentleReframes && api.gentleReframes.length) {
+      return {
+        harsh: api.bubbleTexts,
+        gentle: api.gentleReframes
+      };
+    }
+  }
+
+  // fallback 到本地关键词匹配的固定文案
   const rule = gameState.analysis || fallbackRule;
   const thoughtSet = microThoughts[rule.type] || microThoughts.default;
   return {
@@ -570,6 +641,15 @@ function playBasketFocusAnimation() {
     }
     basketFocusProp.src = basketFocusFrames[frame];
   }, 170);
+}
+
+function openBasketInputCard() {
+  if (gameState.roomStep !== "basket") return;
+  roomShell.classList.add("basket-focus-dismissed");
+  window.setTimeout(() => {
+    roomShell.classList.add("basket-input-ready");
+    emotionInput.focus();
+  }, 340);
 }
 
 function startBackgroundMusic() {
@@ -838,16 +918,24 @@ function finishReceipt() {
   const rule = gameState.analysis || fallbackRule;
   const source = gameState.userText.length > 42 ? `${gameState.userText.slice(0, 42)}...` : gameState.userText;
   const composedLine = gameState.composedSentence || gameState.buildCards.map(card => card.text).join("");
-  const receiptTextLines = getRandomReceiptTexts(rule.type, 2);
-  const mainLine = composedLine || receiptTextLines.join("\n");
-  gameState.cleanIndex = Math.floor(48 + Math.random() * 38);
+
+  // API 成功时优先使用 DeepSeek 返回的个性化小票内容
+  const apiSuccess = gameState.apiStatus === "success" && gameState.apiResult;
+  const mainLine = composedLine
+    || (apiSuccess && gameState.apiResult.receiptResult)
+    || getRandomReceiptTexts(rule.type, 2).join("\n");
+
+  gameState.cleanIndex = (apiSuccess && gameState.apiResult.cleanIndex)
+    || Math.floor(48 + Math.random() * 38);
+
   gameState.receipt = {
-    title: `${rule.label}已洗护完成`,
+    title: (apiSuccess && gameState.apiResult.receiptTitle) || `${rule.label}已洗护完成`,
     result: mainLine,
     emotion: rule.label,
     cloth: rule.cloth,
     cleanIndex: `${gameState.cleanIndex}%`,
     source: source ? `已收好：${source}` : "已收好：一件没有写明来源的心事",
+    suggestion: (apiSuccess && gameState.apiResult.suggestion) || "",
     cards: gameState.microCards.map(card => card.gentle),
     composedSentence: composedLine,
     createdAt: new Date().toISOString()
@@ -857,7 +945,8 @@ function finishReceipt() {
   document.getElementById("receiptCloth").textContent = gameState.receipt.cloth;
   document.getElementById("receiptEmotion").textContent = gameState.receipt.emotion;
   document.getElementById("receiptSource").textContent = gameState.receipt.source;
-  document.getElementById("receiptResult").textContent = gameState.receipt.result;
+  document.getElementById("receiptResult").textContent = gameState.receipt.result
+    + (gameState.receipt.suggestion ? `\n\n💡 ${gameState.receipt.suggestion}` : "");
   document.getElementById("cleanIndex").textContent = gameState.receipt.cleanIndex;
   setScene("receipt");
 }
@@ -955,64 +1044,228 @@ document.getElementById("startBtn").addEventListener("click", () => {
 });
 
 document.querySelector("[data-action='backHome']").addEventListener("click", () => {
-  roomShell.classList.remove("show-recompose", "micro-complete", "pouring-detergent");
+  roomShell.classList.remove("show-recompose", "micro-complete", "pouring-detergent", "basket-focus-dismissed", "basket-input-ready");
   setScene("home");
   setRoomStep("wide");
 });
 
 basketHotspot.addEventListener("click", () => {
   if (gameState.roomStep === "wide") {
+    roomShell.classList.remove("basket-focus-dismissed", "basket-input-ready");
     setRoomStep("basket");
     playBasketFocusAnimation();
-    setTimeout(() => emotionInput.focus(), 1220);
   }
 });
+
+if (basketFocusProp) {
+  basketFocusProp.addEventListener("click", openBasketInputCard);
+}
+
+if (basketFocusCue) {
+  basketFocusCue.addEventListener("click", openBasketInputCard);
+}
 
 emotionInput.addEventListener("input", () => {
   inputCount.textContent = `${emotionInput.value.length} / 120`;
   inputError.textContent = "";
 });
 
-document.getElementById("submitEmotion").addEventListener("click", () => {
+function findRuleByType(emotionType) {
+  return rules.find(r => r.type === emotionType) || fallbackRule;
+}
+
+async function handleEmotionSubmit() {
   const text = emotionInput.value.trim();
   if (!text) {
     inputError.textContent = "先写一句今天想洗掉的东西。";
     emotionInput.focus();
     return;
   }
+
   gameState.userText = text;
-  gameState.analysis = detectEmotion(text);
-  gameState.cloth = gameState.analysis.cloth;
-  gameState.emoji = gameState.analysis.emoji;
+
+  // 显示 loading 状态
+  gameState.apiStatus = "loading";
+  submitEmotionBtn.disabled = true;
+  apiLoading.classList.add("show");
+  inputError.textContent = "";
+
+  try {
+    // 尝试调用 DeepSeek API
+    const apiResult = await analyzeEmotion(text);
+    gameState.apiStatus = "success";
+    gameState.apiResult = apiResult;
+
+    // 用 API 返回的 emotionType 找到匹配的视觉资产规则
+    const matchedRule = findRuleByType(apiResult.emotionType);
+    gameState.analysis = {
+      ...matchedRule,
+      label: apiResult.emotionLabel || matchedRule.label
+    };
+    gameState.cloth = matchedRule.cloth;
+    gameState.emoji = matchedRule.emoji;
+
+    console.log("✅ DeepSeek API 分析成功:", apiResult.emotionType, apiResult.emotionLabel);
+  } catch (err) {
+    // API 失败 → fallback 到本地关键词匹配
+    console.warn("⚠️ DeepSeek API 失败，使用本地关键词匹配:", err.message);
+    gameState.apiStatus = "fallback";
+    gameState.apiResult = null;
+    gameState.analysis = detectEmotion(text);
+    gameState.cloth = gameState.analysis.cloth;
+    gameState.emoji = gameState.analysis.emoji;
+  }
+
+  // 隐藏 loading，继续流程
+  gameState.apiStatus = gameState.apiStatus === "loading" ? "fallback" : gameState.apiStatus;
+  apiLoading.classList.remove("show");
+  submitEmotionBtn.disabled = false;
   resetWashProgress();
+  roomShell.classList.remove("basket-input-ready");
   prepareThrow();
   setRoomStep("cloth");
-});
+}
+
+submitEmotionBtn.addEventListener("click", handleEmotionSubmit);
 
 function sendClothToWasher() {
   if (gameState.roomStep !== "cloth") {
     if (gameState.roomStep === "wide") npcLine.textContent = "先点脏衣篓，把今天放进去。";
     return;
   }
+  roomShell.classList.remove("cloth-inside-ready");
   setRoomStep("washer");
   miniCloth.classList.add("visible");
-  setTimeout(() => setPanel("detergent"), 780);
+  setTimeout(() => {
+    roomShell.classList.add("cloth-inside-ready");
+    miniCloth.classList.remove("visible");
+  }, 680);
+  setTimeout(() => setPanel("detergent"), 980);
 }
 
 document.getElementById("clothCard").addEventListener("click", sendClothToWasher);
 washerHotspot.addEventListener("click", sendClothToWasher);
 
-function pourDetergent() {
-  if (gameState.roomStep !== "detergent") return;
-  roomShell.classList.add("pouring-detergent");
-  npcLine.textContent = `${gameState.analysis.detergentName}倒入中，泡泡马上就来。`;
-  setTimeout(() => {
-    roomShell.classList.remove("pouring-detergent");
-    startMicroBubbles();
-  }, 1450);
+let detergentDragging = false;
+let detergentMoved = false;
+let detergentPointerStart = { x: 0, y: 0 };
+let detergentDragOffset = { x: 0, y: 0 };
+let detergentPoint = { x: 68, y: 49 };
+let detergentPourTimer = null;
+
+function screenPointInRoom(event) {
+  const rect = roomShell.getBoundingClientRect();
+  return {
+    x: ((event.clientX - rect.left) / rect.width) * 100,
+    y: ((event.clientY - rect.top) / rect.height) * 100
+  };
 }
 
-detergentBottle.addEventListener("click", pourDetergent);
+function placeDetergentBottle(point) {
+  detergentPoint = {
+    x: Math.max(10, Math.min(90, point.x)),
+    y: Math.max(12, Math.min(86, point.y))
+  };
+  detergentBottle.style.left = `${detergentPoint.x}%`;
+  detergentBottle.style.top = `${detergentPoint.y}%`;
+}
+
+function resetDetergentBottlePosition() {
+  detergentPoint = { x: 68, y: 49 };
+  detergentBottle.style.left = "";
+  detergentBottle.style.top = "";
+  detergentBottle.classList.remove("is-dragging", "is-hot");
+  roomShell.classList.remove("detergent-target-hot", "detergent-poured");
+}
+
+function isDetergentOverWasher(point) {
+  return point.x > 36 && point.x < 65 && point.y > 40 && point.y < 66;
+}
+
+function playDetergentFrames(rule) {
+  if (!detergentPourFrame) return;
+  let frameIndex = 1;
+  detergentPourFrame.src = detergentFrameAsset(rule.detergentKey, frameIndex);
+  detergentPourTimer = window.setInterval(() => {
+    frameIndex += 1;
+    if (frameIndex > 6) {
+      window.clearInterval(detergentPourTimer);
+      detergentPourTimer = null;
+      return;
+    }
+    detergentPourFrame.src = detergentFrameAsset(rule.detergentKey, frameIndex);
+  }, 260);
+}
+
+function pourDetergent(event) {
+  if (event) event.preventDefault();
+  if (gameState.roomStep !== "detergent") return;
+  if (roomShell.classList.contains("pouring-detergent")) return;
+  const rule = gameState.analysis || fallbackRule;
+  window.clearInterval(detergentPourTimer);
+  resetDetergentBottlePosition();
+  roomShell.classList.add("pouring-detergent");
+  npcLine.textContent = `${rule.detergentName}倒入中，泡泡马上就来。`;
+  playDetergentFrames(rule);
+  setTimeout(() => {
+    roomShell.classList.remove("pouring-detergent");
+    roomShell.classList.add("detergent-poured");
+  }, 1650);
+  setTimeout(() => {
+    roomShell.classList.remove("detergent-poured");
+    startMicroBubbles();
+  }, 2100);
+}
+
+function startDetergentDrag(event) {
+  if (gameState.roomStep !== "detergent") return;
+  if (roomShell.classList.contains("pouring-detergent")) return;
+  detergentDragging = true;
+  detergentMoved = false;
+  detergentPointerStart = { x: event.clientX, y: event.clientY };
+  const point = screenPointInRoom(event);
+  detergentDragOffset = {
+    x: detergentPoint.x - point.x,
+    y: detergentPoint.y - point.y
+  };
+  detergentBottle.setPointerCapture(event.pointerId);
+  detergentBottle.classList.add("is-dragging");
+  event.preventDefault();
+}
+
+function moveDetergentDrag(event) {
+  if (!detergentDragging) return;
+  const distance = Math.hypot(event.clientX - detergentPointerStart.x, event.clientY - detergentPointerStart.y);
+  if (distance > 5) detergentMoved = true;
+  const point = screenPointInRoom(event);
+  placeDetergentBottle({
+    x: point.x + detergentDragOffset.x,
+    y: point.y + detergentDragOffset.y
+  });
+  const isHot = isDetergentOverWasher(detergentPoint);
+  detergentBottle.classList.toggle("is-hot", isHot);
+  roomShell.classList.toggle("detergent-target-hot", isHot);
+}
+
+function endDetergentDrag(event) {
+  if (!detergentDragging) return;
+  detergentDragging = false;
+  detergentBottle.releasePointerCapture(event.pointerId);
+  detergentBottle.classList.remove("is-dragging");
+  roomShell.classList.remove("detergent-target-hot");
+
+  if (isDetergentOverWasher(detergentPoint) || !detergentMoved) {
+    pourDetergent(event);
+    return;
+  }
+
+  resetDetergentBottlePosition();
+}
+
+detergentBottle.addEventListener("pointerdown", startDetergentDrag);
+detergentBottle.addEventListener("pointermove", moveDetergentDrag);
+detergentBottle.addEventListener("pointerup", endDetergentDrag);
+detergentBottle.addEventListener("pointercancel", endDetergentDrag);
 
 let scrubbing = false;
 const scrubArea = document.getElementById("scrubArea");
@@ -1131,7 +1384,7 @@ document.getElementById("restartBtn").addEventListener("click", () => {
   gameState.analysis = null;
   gameState.receipt = null;
   resetWashProgress();
-  roomShell.classList.remove("show-clean-result", "show-recompose", "micro-complete", "pouring-detergent");
+  roomShell.classList.remove("show-clean-result", "show-recompose", "micro-complete", "pouring-detergent", "basket-focus-dismissed", "basket-input-ready");
   if (cleanCloth) cleanCloth.classList.remove("hung");
   if (packReceiptBtn) packReceiptBtn.disabled = true;
   setScene("room");
