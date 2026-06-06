@@ -782,6 +782,7 @@ textarea:focus {
   font-size: clamp(15px, 4.2vw, 21px);
   line-height: 1.65;
   font-weight: 850;
+  white-space: pre-line;
 }
 
 .receipt-meta {
@@ -1052,17 +1053,16 @@ body {
 .art-start-btn {
   position: absolute;
   left: 50%;
-  top: 87.2%;
-  width: 42%;
-  max-width: 210px;
-  height: 5.8%;
+  top: 90.1%;
+  width: 62%;
+  max-width: 280px;
+  height: 7.2%;
   min-height: 44px;
   border: 0;
   border-radius: 999px;
-  background: rgba(255, 176, 184, .12);
-  color: #111827;
-  font-size: clamp(16px, 5vw, 22px);
-  font-weight: 950;
+  background: rgba(255, 176, 184, .02);
+  color: transparent;
+  font-size: 0;
   transform: translate(-50%, -50%);
 }
 
@@ -1827,9 +1827,18 @@ body {
 }
 
 .room-shell[data-room-step="basket"] .emotion-note {
+  z-index: 38;
+  top: calc(6dvh + env(safe-area-inset-top));
+  bottom: auto;
   transform: translate(-50%, 0);
   opacity: 1;
   pointer-events: auto;
+  transition-delay: .48s;
+}
+
+.room-shell[data-room-step="basket"] .emotion-note textarea {
+  min-height: clamp(70px, 12dvh, 98px);
+  max-height: 16dvh;
 }
 
 .emotion-note label {
@@ -2005,7 +2014,13 @@ body {
   background: #cfe3f2;
 }
 
-.room-bg {
+.room-bg,
+.room-midground,
+.room-foreground,
+.room-hanging-layer,
+.room-side-layer,
+.room-washer-layer,
+.room-basket-layer {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -2014,6 +2029,72 @@ body {
   object-position: center center;
   user-select: none;
   -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+.room-bg {
+  z-index: 0;
+}
+
+.room-midground {
+  z-index: 8;
+}
+
+.room-foreground {
+  z-index: 28;
+}
+
+.room-hanging-layer {
+  z-index: 7;
+}
+
+.room-side-layer {
+  z-index: 9;
+}
+
+.room-washer-layer {
+  z-index: 18;
+}
+
+.room-basket-layer {
+  z-index: 30;
+}
+
+.basket-focus-prop {
+  position: absolute;
+  left: 16%;
+  top: 77%;
+  z-index: 34;
+  width: min(40vw, 178px);
+  max-width: 86%;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  transform: translate(-50%, -50%) scale(.48) rotate(-2deg);
+  transform-origin: 50% 62%;
+  filter: drop-shadow(0 1.6dvh 2.2dvh rgba(66, 47, 42, .18));
+  transition:
+    left .72s cubic-bezier(.2, .78, .2, 1),
+    top .72s cubic-bezier(.2, .78, .2, 1),
+    width .72s cubic-bezier(.2, .78, .2, 1),
+    opacity .24s ease,
+    transform .72s cubic-bezier(.2, .78, .2, 1);
+}
+
+.room-shell[data-room-step="basket"] .basket-focus-prop,
+.room-shell[data-room-step="cloth"] .basket-focus-prop {
+  left: 50%;
+  top: 56%;
+  width: min(82vw, 360px);
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1) rotate(0deg);
+}
+
+.room-shell[data-room-step="basket"] .room-basket-layer,
+.room-shell[data-room-step="cloth"] .room-basket-layer {
+  opacity: 0;
+  transition: opacity .28s ease;
 }
 
 .back-wall,
@@ -2837,4 +2918,139 @@ body {
   .recompose-scene {
     grid-template-rows: minmax(0, 42%) auto minmax(132px, 26%) auto;
   }
+}
+
+/* Bubble package integration: keep bubbles inside the laundry room, no separate page. */
+.micro-bubble-scene {
+  background: transparent;
+}
+
+.micro-bubble-scene:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 46% 36%, rgba(255,255,255,.36), transparent 24%),
+    linear-gradient(180deg, rgba(191, 231, 248, .08), rgba(255, 246, 230, .12));
+  pointer-events: none;
+}
+
+.micro-water,
+.micro-cloth-shadow {
+  display: none;
+}
+
+.room-shell[data-room-step="microBubble"] .room-camera {
+  opacity: 1;
+  filter: none;
+}
+
+.room-shell.micro-complete .micro-bubble-scene {
+  transform: none;
+  opacity: 1;
+}
+
+.micro-bubble-field {
+  inset: 0;
+}
+
+.micro-bubble {
+  width: var(--size);
+  min-width: 44px;
+  min-height: 44px;
+  left: var(--x);
+  top: var(--y);
+  z-index: var(--z);
+  transform: translate(-50%, -50%) scale(var(--scale, 1));
+  transition: transform .16s ease, filter .16s ease, opacity .18s ease;
+}
+
+.micro-bubble[data-role="hero"] {
+  filter: drop-shadow(0 1.2dvh 1.6dvh rgba(80, 134, 172, .22));
+}
+
+.micro-bubble[data-role="main"] {
+  filter: drop-shadow(0 .8dvh 1.1dvh rgba(80, 134, 172, .18));
+}
+
+.micro-bubble[data-role="whisper"] {
+  opacity: .86;
+}
+
+.micro-bubble:nth-child(1),
+.micro-bubble:nth-child(2),
+.micro-bubble:nth-child(3) {
+  left: var(--x);
+  top: var(--y);
+}
+
+.micro-bubble.is-pressed {
+  --scale: .93;
+}
+
+.micro-bubble.is-popping {
+  --scale: 1.08;
+  pointer-events: none;
+}
+
+.micro-bubble.is-gone {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bubble-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.micro-bubble .micro-card-face.harsh {
+  width: 74%;
+  min-height: 32%;
+  padding: .42em .52em;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .38);
+  color: #7b4b86;
+  font-family: "YouYuan", "幼圆", "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+  font-size: clamp(13px, 4vw, 19px);
+  font-weight: 850;
+  line-height: 1.12;
+  word-break: keep-all;
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.92),
+    .04em .04em 0 rgba(244, 159, 190, .26);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.26);
+}
+
+.micro-bubble[data-role="hero"] .micro-card-face.harsh {
+  width: 78%;
+  font-size: clamp(18px, 5.4vw, 25px);
+  background: rgba(255, 255, 255, .46);
+}
+
+.micro-bubble[data-role="main"] .micro-card-face.harsh {
+  font-size: clamp(15px, 4.6vw, 22px);
+}
+
+.micro-bubble[data-role="echo"] .micro-card-face.harsh,
+.micro-bubble[data-role="whisper"] .micro-card-face.harsh {
+  width: 70%;
+  min-height: 30%;
+  font-size: clamp(11px, 3.4vw, 16px);
+  background: rgba(255, 255, 255, .28);
+}
+
+.micro-bubble.is-popping .micro-card-face,
+.micro-bubble.is-gone .micro-card-face {
+  opacity: 0;
+}
+
+.micro-bubble .micro-card-face.gentle,
+.micro-bubble .bubble-shell,
+.micro-bubble .burst-lines {
+  display: none;
 }

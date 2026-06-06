@@ -9,6 +9,7 @@ const miniCloth = document.getElementById("miniCloth");
 const npcLine = document.getElementById("npcLine");
 const roomShell = document.querySelector(".room-shell");
 const basketHotspot = document.getElementById("basketHotspot");
+const basketFocusProp = document.getElementById("basketFocusProp");
 const washerHotspot = document.getElementById("washerHotspot");
 const sinkHotspot = document.getElementById("sinkHotspot");
 const lineHotspot = document.getElementById("lineHotspot");
@@ -22,112 +23,170 @@ const cardTray = document.getElementById("cardTray");
 const packReceiptBtn = document.getElementById("packReceiptBtn");
 const CLOTH_ASSET_VERSION = "202606061932";
 const CLEAN_ASSET_VERSION = "202606061949";
+const BUBBLE_ASSET_PATH = "assets/bubbles/";
+const POP_SOUND_SRC = "../image/泡泡裂开声音.m4a";
+const BG_MUSIC_SRC = "../Tidy_Little_Victories.mp3";
 const clothAsset = fileName => `../素材照片文件夹/${fileName}?v=${CLOTH_ASSET_VERSION}`;
 const cleanAsset = fileName => `../新照片素材/${fileName}?v=${CLEAN_ASSET_VERSION}`;
+const bubbleAsset = fileName => `${BUBBLE_ASSET_PATH}${fileName}`;
+const bubblePopFrames = [
+  "anim_bubble_pop_01.png",
+  "anim_bubble_pop_02.png",
+  "anim_bubble_pop_03.png",
+  "anim_bubble_pop_04.png",
+  "anim_bubble_pop_05.png",
+  "anim_bubble_pop_06.png",
+  "anim_bubble_pop_07.png"
+].map(bubbleAsset);
+const basketFocusFrames = [
+  "1.png",
+  "2.png",
+  "3.png",
+  "4.png",
+  "5.png",
+  "6.png"
+].map(fileName => `../木桶/${fileName}?v=2026060705`);
+
+const bubblePresets = {
+  large: {
+    idle: bubbleAsset("bubble_large_idle.png"),
+    pressed: bubbleAsset("bubble_large_pressed.png")
+  },
+  medium: {
+    idle: bubbleAsset("bubble_medium_idle.png"),
+    pressed: bubbleAsset("bubble_medium_pressed.png")
+  },
+  small: {
+    idle: bubbleAsset("bubble_small_idle.png"),
+    pressed: bubbleAsset("bubble_small_idle.png")
+  }
+};
+
+const popSound = new Audio(POP_SOUND_SRC);
+popSound.preload = "auto";
+
+const bgMusic = new Audio(BG_MUSIC_SRC);
+bgMusic.loop = true;
+bgMusic.preload = "auto";
+bgMusic.volume = 0.36;
+let bgMusicStarted = false;
+
+const bubbleStageSlots = [
+  { x: 49, y: 31, baseSize: 29, role: "hero", z: 8 },
+  { x: 29, y: 42, baseSize: 24, role: "main", z: 7 },
+  { x: 70, y: 45, baseSize: 24, role: "main", z: 7 },
+  { x: 43, y: 59, baseSize: 22, role: "main", z: 7 },
+  { x: 63, y: 66, baseSize: 21, role: "main", z: 7 },
+  { x: 20, y: 28, baseSize: 15, role: "echo", z: 4 },
+  { x: 80, y: 30, baseSize: 14, role: "echo", z: 4 },
+  { x: 22, y: 63, baseSize: 16, role: "echo", z: 4 },
+  { x: 80, y: 70, baseSize: 15, role: "echo", z: 4 }
+];
 
 const rules = [
   {
-    type: "meltdown",
+    type: "breakdown",
     label: "崩溃 / 发疯",
-    keywords: ["崩溃", "疯了", "受不了", "炸了", "完蛋", "不行了", "破防"],
-    cloth: "崩溃爆炸睡衣",
+    keywords: ["崩溃", "破防", "发疯", "疯了", "绷不住", "受不了了", "受不了", "不行了", "心态爆炸", "爆炸了", "炸了", "裂开", "碎了", "麻了", "天塌了", "寄了", "彻底寄了", "毁灭吧", "想逃离", "想跑路", "精神状态", "cpu烧了", "大脑宕机", "红温", "情绪失控"],
+    cloth: "崩溃睡衣",
     emoji: "🥼",
     asset: clothAsset("7、崩溃睡衣.png"),
     cleanAsset: cleanAsset("崩溃睡衣.png"),
     detergentName: "先暂停洗衣液",
     softenerName: "没关系柔顺剂",
-    bubbles: ["我真的受不了", "要炸了", "全都乱了", "我撑不住", "今天太过分"],
+    bubbles: ["要炸了", "不管了", "绷不住", "裂开了", "受不了"],
     result: "如果今天已经很满，先不要继续往里塞东西。停一下、喝水、坐稳，也算处理。"
   },
   {
     type: "anger",
     label: "愤怒",
-    keywords: ["生气", "气死", "烦死", "讨厌", "火大", "无语", "不爽", "攻击"],
-    cloth: "愤怒红袜子",
+    keywords: ["愤怒", "生气", "气死", "气炸", "火大", "烦死", "烦躁", "暴躁", "不爽", "无语", "服了", "离谱", "凭什么", "恶心", "晦气", "忍不了", "受不了", "想骂人", "想发火", "被坑", "背刺", "甩锅", "针对我", "队友摆烂", "组员划水", "攻击"],
+    cloth: "愤怒袜子",
     emoji: "🧦",
     asset: clothAsset("2、愤怒袜子.png"),
     cleanAsset: cleanAsset("愤怒袜子.png"),
     detergentName: "消消气洗衣液",
     softenerName: "轻一点漂白剂",
-    bubbles: ["凭什么", "太烦了", "我不想忍", "没人听我说", "这不公平"],
+    bubbles: ["凭什么", "忍够了", "气死了", "太离谱", "别惹我"],
     result: "你的火气不是坏东西，它提醒你边界被碰到了。先把火放小一点，再决定怎么说。"
   },
   {
-    type: "wronged",
-    label: "委屈",
-    keywords: ["委屈", "没人懂", "冤", "难受", "被误会", "想哭", "难过", "哭"],
-    cloth: "委屈小毛巾",
+    type: "sadness",
+    label: "委屈 / 难过 / 想哭",
+    keywords: ["委屈", "难过", "想哭", "哭了", "哭死", "哭", "心酸", "鼻酸", "泪目", "心碎", "失落", "低落", "沮丧", "emo", "被误会", "被冤枉", "没人理解", "没人懂", "不被在乎", "不被看见", "被否定", "我明明", "我已经很努力了", "我真的尽力了", "开心不起来", "破碎", "扎心", "冤", "难受"],
+    cloth: "委屈毛衣",
     emoji: "🧣",
     asset: clothAsset("4、委屈毛衣.png"),
     cleanAsset: cleanAsset("委屈毛衣.png"),
     detergentName: "抱抱你洗衣液",
     softenerName: "不怪你柔顺剂",
-    bubbles: ["没人懂我", "我也很努力了", "为什么怪我", "我有点想哭", "我说不出口"],
+    bubbles: ["好委屈", "没人懂", "没看见", "好难过", "想哭"],
     result: "这份委屈值得被看见。就算暂时没人完全懂你，你也可以先站在自己这一边。"
   },
   {
     type: "anxiety",
     label: "焦虑",
-    keywords: ["焦虑", "担心", "紧张", "害怕", "来不及", "压力"],
-    cloth: "焦虑皱皱衬衫",
+    keywords: ["焦虑", "慌", "心慌", "紧张", "不安", "担心", "害怕", "压力", "压力大", "压力山大", "来不及", "赶不上", "完蛋了", "完蛋", "要完了", "救命", "ddl", "deadline", "考试", "期末", "挂科", "绩点", "gpa", "保研", "考研", "实习", "面试", "怕失败", "怕做不好", "睡不着"],
+    cloth: "焦虑衣服",
     emoji: "👔",
     asset: clothAsset("1、迷茫衬衫.png"),
     cleanAsset: cleanAsset("迷茫衬衫.png"),
     detergentName: "慢慢来洗衣液",
     softenerName: "先呼吸柔顺剂",
-    bubbles: ["来不及了", "我会搞砸", "别人都比我快", "不能出错", "脑子停不下来"],
+    bubbles: ["来不及", "完蛋了", "好慌", "要挂了", "救命"],
     result: "你不是太差，只是今天的脑内滚筒开得太久了。先让一件小事完成，就已经很好。"
   },
   {
-    type: "tired",
+    type: "fatigue",
     label: "疲惫",
-    keywords: ["累", "困", "疲惫", "不想动", "撑不住", "耗尽", "没力气", "熬夜"],
-    cloth: "疲惫软帽衫",
+    keywords: ["疲惫", "累", "好累", "累死", "累麻了", "困", "困死", "睡不醒", "没精神", "没力气", "没电", "电量不足", "被掏空", "熬夜", "通宵", "肝不动", "肝废了", "忙死", "连轴转", "不想动", "只想躺着", "躺平", "摆烂", "牛马", "脆皮大学生", "撑不住", "耗尽"],
+    cloth: "疲惫外套",
     emoji: "🧥",
     asset: clothAsset("3、疲惫外套.png"),
     cleanAsset: cleanAsset("疲惫外套.png"),
     detergentName: "休息一下洗衣液",
     softenerName: "充充电柔顺剂",
-    bubbles: ["我好累", "不想再撑", "什么都不想做", "睡也睡不够", "电量太低"],
+    bubbles: ["好累", "没力气", "不想动", "没电了", "想躺着"],
     result: "今天可以不追求满格电量。能把自己放回柔软一点的位置，也是一种完成。"
   },
   {
-    type: "lost",
-    label: "迷茫",
-    keywords: ["迷茫", "不知道", "没方向", "混乱", "空", "怎么办", "无助", "不知道怎么办"],
-    cloth: "迷路口袋 T 恤",
+    type: "confusion",
+    label: "迷茫 / 无助 / 不知道怎么办",
+    keywords: ["迷茫", "无助", "不知道怎么办", "不知道咋办", "不知道怎么选", "不知道怎么做", "不知道", "没有方向", "没方向", "找不到方向", "看不到未来", "不知所措", "没头绪", "毫无头绪", "懵", "懵了", "困惑", "混乱", "卡住了", "卡关", "不会了", "未来", "人生规划", "职业规划", "不知道意义", "不知道自己想要什么", "怎么办", "空"],
+    cloth: "迷茫围巾",
     emoji: "👕",
     asset: clothAsset("5、迷茫围巾.png"),
     cleanAsset: cleanAsset("迷茫围巾.png"),
     detergentName: "走一步洗衣液",
     softenerName: "会清楚柔顺剂",
-    bubbles: ["我不知道", "没有方向", "选哪个都怕错", "好像卡住了", "看不清下一步"],
+    bubbles: ["不知道", "卡住了", "没方向", "好迷茫", "怎么办"],
     result: "迷茫不是失败，它只是地图还没有刷新。先选一个最小的下一步，不用一次走完。"
   },
   {
-    type: "lonely",
-    label: "孤独",
-    keywords: ["孤独", "一个人", "没人陪", "被丢下", "冷清", "没人理", "被忽略"],
-    cloth: "孤独单只手套",
+    type: "loneliness",
+    label: "孤独 / 被忽略 / 没人懂",
+    keywords: ["孤独", "孤单", "寂寞", "一个人", "没人懂", "没人理解", "没人陪", "没人理我", "没人理", "没人回我", "没人找我", "被忽略", "被冷落", "被落下", "被抛下", "被丢下", "透明人", "没有存在感", "不被看见", "融不进去", "格格不入", "局外人", "被孤立", "被排挤", "不属于这里", "冷清"],
+    cloth: "孤独手套",
     emoji: "🧤",
     asset: clothAsset("6、孤独手套.png"),
     cleanAsset: cleanAsset("孤独手套.png"),
     detergentName: "有人在洗衣液",
     softenerName: "陪陪你柔顺剂",
-    bubbles: ["只有我一个", "没人想起我", "我像被丢下", "想找人说话", "有点冷"],
+    bubbles: ["没人懂", "被忘了", "一个人", "没人陪", "好孤单"],
     result: "孤独不代表你不重要。它只是今天的房间安静了一点，你依然值得被回应。"
   },
   {
-    type: "overthinking",
-    label: "内耗",
-    keywords: ["内耗", "想太多", "自责", "怪我", "做不好", "反复", "纠结"],
-    cloth: "内耗打结围巾",
+    type: "rumination",
+    label: "内耗 / 纠结 / 自责 / 想太多",
+    keywords: ["内耗", "精神内耗", "纠结", "好纠结", "自责", "愧疚", "后悔", "想太多", "反复想", "一直想", "反复复盘", "过度思考", "overthinking", "放不下", "想不开", "绕不出来", "脑子停不下来", "是不是我的错", "我是不是做错了", "我是不是很差", "如果当时", "早知道", "要是我", "左右为难", "拉扯", "拧巴", "怪我", "做不好", "反复"],
+    cloth: "叠加线团效果",
     emoji: "🧶",
     asset: clothAsset("8、内耗线团.png"),
     cleanAsset: cleanAsset("内耗毛线团.png"),
+    isOverlay: true,
     detergentName: "别拧巴洗衣液",
     softenerName: "放过自己柔顺剂",
-    bubbles: ["是不是我的问题", "我又想多了", "我不够好", "早知道就好了", "停不下来"],
+    bubbles: ["想太多", "停不下", "又错了", "好纠结", "怪自己"],
     result: "你不需要把每个细节都审判一遍。今天先把自己从反复播放里暂停出来。"
   }
 ];
@@ -147,76 +206,93 @@ const fallbackRule = {
 
 const receiptLines = {
   anxiety: [
-    "我允许自己今天只做一小步，也足够了。",
-    "我允许暂时放下“必须完美”的念头。",
-    "我允许大脑暂停彩排未来，让自己休息。",
-    "我允许焦虑像衣服一样挂一会儿再理顺。",
-    "我允许慢慢调整节奏，不必一次解决所有事情。"
+    "今天先洗一件小事就好。",
+    "没做完的，也可以先晾一晾。",
+    "未来不用现在一次想清。",
+    "慢慢来，时间没有在追你。",
+    "你已经在路上，不必立刻到达。"
   ],
   anger: [
-    "我允许愤怒的情绪像热气腾腾的袜子一样先冷却。",
-    "我允许自己说“不”，保护自己的边界。",
-    "我允许情绪停留一会儿，再决定如何回应。",
-    "我允许把愤怒当作力量的提醒，而不是负担。",
-    "我允许愤怒之后轻轻舒展自己，像晾晒衣服一样。"
+    "有些不舒服，值得被听见。",
+    "火气可以先散一散，话可以慢慢说。",
+    "你的边界，不需要一再让步。",
+    "生气不是坏事，它在替你报警。",
+    "先把心里的热气放出来一点。"
   ],
-  tired: [
-    "我允许自己休息，不必强行继续。",
-    "我允许疲惫像厚重外套一样先挂起来。",
-    "我允许暂停处理一切，让身体和心灵充电。",
-    "我允许慢慢恢复，哪怕今天只做到一点点。",
-    "我允许闭上眼睛，放下责任片刻。"
+  fatigue: [
+    "今天的你，已经很用力了。",
+    "累了就先靠一会儿。",
+    "外套太重，就先挂起来。",
+    "不是停下就输了，是该充电了。",
+    "今晚先把自己还给自己。"
   ],
-  wronged: [
-    "我允许悲伤时，眼泪流淌成星河。",
-    "我允许自己委屈，寻求温柔拥抱。",
-    "我允许毛衣般的温暖安慰自己，不必坚强。",
-    "我允许情绪像慢慢干的衣服一样，逐渐复原。",
-    "我允许哭泣，它是心灵的清洗。"
+  sadness: [
+    "没被看见的努力，也算数。",
+    "想哭就哭吧，眼泪会带走一点重。",
+    "今天不用急着坚强。",
+    "有些委屈，可以先放在这里。",
+    "你的难过，不需要证明。"
   ],
-  lost: [
-    "我允许暂时迷茫，未来慢慢理清。",
-    "我允许不清楚下一步，先选一个小方向。",
-    "我允许思绪打结，但不会永远纠缠。",
-    "我允许给自己时间，答案会慢慢出现。",
-    "我允许放慢脚步，探索适合自己的道路。"
+  confusion: [
+    "看不清路时，先走一小步。",
+    "答案会慢慢浮上来。",
+    "卡住不是失败，只是还在转弯。",
+    "风还没停，方向可以再等等。",
+    "今天先不用知道全部答案。"
   ],
-  lonely: [
-    "我允许孤独像手套一样包裹我，让我温暖。",
-    "我允许在无人理解时，依然温柔对待自己。",
-    "我允许自己独处，发现内心的声音。",
-    "我允许享受自己的陪伴，不必急于寻找认同。",
-    "我允许与自己建立最坚定的联系。"
+  loneliness: [
+    "没人听见时，也别弄丢自己。",
+    "一个人的时候，也有微光。",
+    "你不是透明的，只是暂时站在安静处。",
+    "有些话，会慢慢遇到愿意听的人。",
+    "先陪自己坐一会儿。"
   ],
-  meltdown: [
-    "我允许情绪崩溃，它只是提醒我需要休息。",
-    "我允许自己像睡衣一样松开防备，重整力量。",
-    "我允许跌倒后慢慢站起来，不必完美。",
-    "我允许混乱暂时存在，再一点点整理。",
-    "我允许无力时，暂时躲进自己的小世界。"
+  breakdown: [
+    "绷不住了，就先松开一点。",
+    "乱成一团，也可以慢慢洗。",
+    "今天不用把自己修好。",
+    "先呼吸，先落地，先回来。",
+    "你撑到这里，已经很不容易。"
   ],
-  overthinking: [
-    "我允许放下自责，不必揪住每个念头。",
-    "我允许给自己空间，不被想法压垮。",
-    "我允许缓慢思考，按自己的节奏前行。",
-    "我允许接受不完美的自己，停止内耗。",
-    "我允许一切如其所是，不必控制所有细节。"
+  rumination: [
+    "别把每个结都系在自己身上。",
+    "想不明白的，先放进风里。",
+    "脑子太吵，就让它静一会儿。",
+    "不必反复审判今天的自己。",
+    "有些答案，会在你不追问时出现。"
   ],
   default: [
-    "我允许今天的自己慢慢来。",
-    "我允许这件心事先变轻一点。",
-    "我允许自己不必立刻找到答案。",
-    "我允许把今天收好，再继续往前走。"
+    "今天也辛苦了。",
+    "洗一洗，慢慢来。",
+    "没关系，先轻一点。",
+    "把心事晾一晾。",
+    "明天会再清爽一点。"
   ]
 };
 
+function getRandomReceiptTexts(emotionKey, count = 2) {
+  const texts = receiptLines[emotionKey] || receiptLines.default;
+  return [...texts].sort(() => Math.random() - 0.5).slice(0, count);
+}
+
+const emotionBubbleTexts = {
+  anxiety: ["来不及", "完蛋了", "好慌", "要挂了", "救命"],
+  anger: ["凭什么", "忍够了", "气死了", "太离谱", "别惹我"],
+  fatigue: ["好累", "没力气", "不想动", "没电了", "想躺着"],
+  confusion: ["不知道", "卡住了", "没方向", "好迷茫", "怎么办"],
+  sadness: ["好委屈", "没人懂", "没看见", "好难过", "想哭"],
+  rumination: ["想太多", "停不下", "又错了", "好纠结", "怪自己"],
+  loneliness: ["没人懂", "被忘了", "一个人", "没人陪", "好孤单"],
+  breakdown: ["要炸了", "不管了", "绷不住", "裂开了", "受不了"],
+  default: ["洗一洗", "没关系", "慢慢来", "会好的", "先呼吸"]
+};
+
+function getBubbleTextsByEmotion(emotionKey) {
+  return emotionBubbleTexts[emotionKey] || emotionBubbleTexts.default;
+}
+
 const microThoughts = {
   anxiety: {
-    harsh: [
-      "我必须立刻把所有事都做好！",
-      "只要有一点没完成，我就完蛋了！",
-      "我现在绝对不能出错！"
-    ],
     gentle: [
       "我可以先走好第一步",
       "一点点完成也算前进",
@@ -224,83 +300,48 @@ const microThoughts = {
     ]
   },
   anger: {
-    harsh: [
-      "凭什么所有人都这样对我！",
-      "我现在真的一句话都不想忍了！",
-      "这根本一点都不公平！"
-    ],
     gentle: [
       "我可以先保护自己的边界",
       "愤怒也可以轻轻落地",
       "我可以晚一点再回应"
     ]
   },
-  tired: {
-    harsh: [
-      "我真的一点力气都没有了！",
-      "为什么我永远都休息不过来！",
-      "我必须继续撑下去！"
-    ],
+  fatigue: {
     gentle: [
       "我可以先休息一下",
       "低电量也值得被照顾",
       "今天少做一点也可以"
     ]
   },
-  lost: {
-    harsh: [
-      "我完全不知道自己在干什么！",
-      "别人都在往前走，只有我卡在原地！",
-      "我肯定选错了方向！"
-    ],
+  confusion: {
     gentle: [
       "我可以先选一个小方向",
       "暂时看不清也没关系",
       "答案会慢慢浮出来"
     ]
   },
-  wronged: {
-    harsh: [
-      "明明我已经很努力了，为什么没人看见！",
-      "为什么受伤的总是我！",
-      "我是不是不值得被理解！"
-    ],
+  sadness: {
     gentle: [
       "我的努力值得被看见",
       "我可以先站在自己这边",
       "委屈也需要被抱一抱"
     ]
   },
-  overthinking: {
-    harsh: [
-      "我是不是又做错了什么！",
-      "我脑子里一直停不下来，快被自己烦死了！",
-      "我必须把每个细节想清楚！"
-    ],
+  rumination: {
     gentle: [
       "我可以放过自己一点",
       "想法很多也不等于错误",
       "我不必控制所有细节"
     ]
   },
-  lonely: {
-    harsh: [
-      "好像根本没有人真的懂我！",
-      "我就算消失了，也不会有人发现吧！",
-      "我只能一直一个人吗！"
-    ],
+  loneliness: {
     gentle: [
       "我仍然值得被回应",
       "我可以先陪着自己",
       "安静也可以有温度"
     ]
   },
-  meltdown: {
-    harsh: [
-      "我现在真的要炸了！",
-      "我控制不住了，什么都不想管了！",
-      "一切都已经乱到不行了！"
-    ],
+  breakdown: {
     gentle: [
       "我可以先停在这里",
       "混乱也会一点点散开",
@@ -308,11 +349,6 @@ const microThoughts = {
     ]
   },
   default: {
-    harsh: [
-      "今天真的有点太重了！",
-      "我不知道该怎么处理！",
-      "我必须马上好起来！"
-    ],
     gentle: [
       "我可以先把它放轻一点",
       "不用马上找到答案",
@@ -336,7 +372,8 @@ const gameState = {
   poppedBubbles: 0,
   sentenceCards: [],
   buildCards: [],
-  composedSentence: ""
+  composedSentence: "",
+  basketFocusTimer: null
 };
 
 function setScene(name) {
@@ -405,8 +442,22 @@ function setRoomStep(step) {
 }
 
 function detectEmotion(text) {
-  const normalized = text.toLowerCase();
-  return rules.find(rule => rule.keywords.some(word => normalized.includes(word))) || fallbackRule;
+  const normalized = text.toLowerCase().replace(/\s/g, "");
+  let bestRule = null;
+  let bestScore = 0;
+
+  rules.forEach((rule, priority) => {
+    const score = rule.keywords.reduce((total, word) => {
+      return normalized.includes(word.toLowerCase().replace(/\s/g, "")) ? total + 1 : total;
+    }, 0);
+
+    if (score > bestScore || (score === bestScore && score > 0 && bestRule && priority < bestRule.priority)) {
+      bestRule = { ...rule, score, priority };
+      bestScore = score;
+    }
+  });
+
+  return bestRule || fallbackRule;
 }
 
 function resetWashProgress() {
@@ -446,10 +497,108 @@ function prepareThrow() {
 
 function getMicroThoughtSet() {
   const rule = gameState.analysis || fallbackRule;
-  return microThoughts[rule.type] || microThoughts.default;
+  const thoughtSet = microThoughts[rule.type] || microThoughts.default;
+  return {
+    harsh: getBubbleTextsByEmotion(rule.type),
+    gentle: thoughtSet.gentle
+  };
+}
+
+function getTextLength(text) {
+  return Array.from(text || "").length;
+}
+
+function getBubbleTypeBySize(size, text) {
+  const length = getTextLength(text);
+  if (size >= 22 || length >= 4) return "large";
+  if (size >= 15 || length >= 3) return "medium";
+  return "small";
+}
+
+function buildAdaptiveBubbleCards(thoughtSet) {
+  const harshTexts = thoughtSet.harsh.length ? thoughtSet.harsh : emotionBubbleTexts.default;
+  const sortedByLength = [...harshTexts].sort((a, b) => getTextLength(b) - getTextLength(a));
+  const echoTexts = [
+    ...sortedByLength,
+    ...harshTexts,
+    ...sortedByLength.slice(0, 2)
+  ];
+
+  return bubbleStageSlots.map((slot, index) => {
+    const text = index < harshTexts.length
+      ? harshTexts[index]
+      : echoTexts[(index - harshTexts.length) % echoTexts.length];
+    const length = getTextLength(text);
+    const lengthBoost = length >= 4 ? 4 : length >= 3 ? 2 : 0;
+    const roleBoost = slot.role === "hero" ? 3 : slot.role === "main" ? 1 : 0;
+    const size = Math.min(32, slot.baseSize + lengthBoost + roleBoost);
+
+    return {
+      ...slot,
+      id: `b${index + 1}`,
+      type: getBubbleTypeBySize(size, text),
+      size,
+      harsh: text,
+      gentle: thoughtSet.gentle[index % thoughtSet.gentle.length]
+    };
+  });
+}
+
+function preloadBubbleImages() {
+  [
+    ...bubblePopFrames,
+    ...basketFocusFrames,
+    ...Object.values(bubblePresets).flatMap(preset => [preset.idle, preset.pressed])
+  ].forEach(src => {
+    const img = new Image();
+    img.src = src;
+  });
+}
+
+function playBasketFocusAnimation() {
+  if (!basketFocusProp) return;
+  let frame = 0;
+  basketFocusProp.src = basketFocusFrames[frame];
+  window.clearInterval(gameState.basketFocusTimer);
+  gameState.basketFocusTimer = window.setInterval(() => {
+    frame += 1;
+    if (frame >= basketFocusFrames.length) {
+      window.clearInterval(gameState.basketFocusTimer);
+      gameState.basketFocusTimer = null;
+      basketFocusProp.src = basketFocusFrames[basketFocusFrames.length - 1];
+      return;
+    }
+    basketFocusProp.src = basketFocusFrames[frame];
+  }, 170);
+}
+
+function startBackgroundMusic() {
+  if (bgMusicStarted) return;
+  bgMusic.play()
+    .then(() => {
+      bgMusicStarted = true;
+    })
+    .catch(() => {});
+}
+
+function bindBackgroundMusicUnlock() {
+  ["pointerdown", "touchstart", "click", "keydown"].forEach(eventName => {
+    document.addEventListener(eventName, startBackgroundMusic, { passive: true });
+  });
 }
 
 function playPopSound() {
+  if (popSound) {
+    const sound = popSound.cloneNode();
+    sound.volume = 0.86;
+    sound.currentTime = 0;
+    sound.play().catch(() => playFallbackPopSound());
+    return;
+  }
+  playFallbackPopSound();
+}
+
+function playFallbackPopSound() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (!AudioContext) return;
   const ctx = new AudioContext();
@@ -471,51 +620,88 @@ function playPopSound() {
 function startMicroBubbles() {
   const thoughtSet = getMicroThoughtSet();
   gameState.poppedBubbles = 0;
-  gameState.microCards = thoughtSet.harsh.slice(0, 3).map((harsh, index) => ({
-    id: `heal-${index}`,
-    harsh,
-    gentle: thoughtSet.gentle[index]
-  }));
+  gameState.microCards = buildAdaptiveBubbleCards(thoughtSet);
   roomShell.classList.remove("micro-complete", "show-recompose", "show-clean-result");
   microBubbleField.innerHTML = "";
 
-  gameState.microCards.forEach((card, index) => {
+  gameState.microCards.forEach(card => {
+    const preset = bubblePresets[card.type];
     const button = document.createElement("button");
     button.className = "micro-bubble";
     button.type = "button";
-    button.dataset.index = String(index);
+    button.dataset.state = "idle";
+    button.dataset.id = card.id;
+    button.dataset.role = card.role;
+    button.dataset.length = String(getTextLength(card.harsh));
+    button.style.setProperty("--x", `${card.x}%`);
+    button.style.setProperty("--y", `${card.y}%`);
+    button.style.setProperty("--size", `${card.size}%`);
+    button.style.setProperty("--z", card.z);
+    button.setAttribute("aria-label", `戳破泡泡：${card.harsh}`);
     button.innerHTML = `
-      <span class="burst-lines" aria-hidden="true"></span>
-      <span class="bubble-shell" aria-hidden="true"></span>
+      <img class="bubble-image" src="${preset.idle}" alt="">
       <span class="micro-card-face harsh">${card.harsh}</span>
-      <span class="micro-card-face gentle">${card.gentle}</span>
     `;
-    button.addEventListener("click", () => popMicroBubble(button, card));
+    const image = button.querySelector(".bubble-image");
+    button.addEventListener("pointerdown", () => pressMicroBubble(button, image, card));
+    button.addEventListener("pointerleave", () => releaseMicroBubble(button, image, card));
+    button.addEventListener("pointerup", () => popMicroBubble(button, image, card));
+    button.addEventListener("click", event => event.preventDefault());
     microBubbleField.appendChild(button);
   });
 
   setPanel("microBubble");
 }
 
-function popMicroBubble(button, card) {
-  if (button.classList.contains("popped")) return;
-  button.classList.add("popped");
-  playPopSound();
-  gameState.poppedBubbles += 1;
-  npcLine.textContent = `“${card.gentle}”留了下来。`;
-
-  if (gameState.poppedBubbles >= gameState.microCards.length) {
-    setTimeout(completeMicroBubbles, 680);
-  }
+function pressMicroBubble(button, image, card) {
+  if (button.dataset.state !== "idle") return;
+  button.classList.add("is-pressed");
+  image.src = bubblePresets[card.type].pressed;
 }
+
+function releaseMicroBubble(button, image, card) {
+  if (button.dataset.state !== "idle") return;
+  button.classList.remove("is-pressed");
+  image.src = bubblePresets[card.type].idle;
+}
+
+function popMicroBubble(button, image, card) {
+  if (button.dataset.state !== "idle") return;
+  button.dataset.state = "popping";
+  button.disabled = true;
+  button.classList.remove("is-pressed");
+  button.classList.add("is-popping");
+  playPopSound();
+  npcLine.textContent = `“${card.harsh}”被戳破了。`;
+
+  let frame = 0;
+  image.src = bubblePopFrames[frame];
+
+  const timer = window.setInterval(() => {
+    frame += 1;
+    if (frame >= bubblePopFrames.length) {
+      window.clearInterval(timer);
+      button.dataset.state = "gone";
+      button.classList.remove("is-popping");
+      button.classList.add("is-gone");
+      gameState.poppedBubbles += 1;
+      if (gameState.poppedBubbles >= gameState.microCards.length) {
+        setTimeout(completeMicroBubbles, 520);
+      }
+      return;
+    }
+    image.src = bubblePopFrames[frame];
+  }, 58);
+}
+
 
 function completeMicroBubbles() {
   roomShell.classList.add("micro-complete");
   microFlash.classList.add("flash");
-  npcLine.textContent = "滚筒里的光亮起来了，衣服和词卡正在变轻。";
+  npcLine.textContent = "泡泡洗掉了，正在打印今天的小票。";
   setTimeout(() => {
     microFlash.classList.remove("flash");
-    showRecompose();
+    finishReceipt();
   }, 920);
 }
 
@@ -531,10 +717,11 @@ function showRecompose() {
   cleanClothImage.src = rule.cleanAsset;
   cleanClothImage.alt = `洗好的${rule.cloth}`;
   gameState.buildCards = [];
+  const healingCards = gameState.microCards.slice(0, 3);
   gameState.sentenceCards = shuffleCards([
     { id: "base-me", text: "我" },
     { id: "base-feel", text: "但是我觉得" },
-    ...gameState.microCards.map(card => ({ id: card.id, text: card.gentle }))
+    ...healingCards.map(card => ({ id: card.id, text: card.gentle }))
   ]);
   roomShell.classList.add("show-recompose");
   setPanel("recompose");
@@ -650,9 +837,9 @@ function beginCardDrag(event, cardId, area) {
 function finishReceipt() {
   const rule = gameState.analysis || fallbackRule;
   const source = gameState.userText.length > 42 ? `${gameState.userText.slice(0, 42)}...` : gameState.userText;
-  const lines = receiptLines[rule.type] || receiptLines.default;
   const composedLine = gameState.composedSentence || gameState.buildCards.map(card => card.text).join("");
-  const mainLine = composedLine || lines[Math.floor(Math.random() * lines.length)];
+  const receiptTextLines = getRandomReceiptTexts(rule.type, 2);
+  const mainLine = composedLine || receiptTextLines.join("\n");
   gameState.cleanIndex = Math.floor(48 + Math.random() * 38);
   gameState.receipt = {
     title: `${rule.label}已洗护完成`,
@@ -676,21 +863,26 @@ function finishReceipt() {
 }
 
 function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
-  const chars = Array.from(text);
-  let line = "";
   let currentY = y;
-  chars.forEach(char => {
-    const testLine = line + char;
-    if (ctx.measureText(testLine).width > maxWidth && line) {
+  String(text).split("\n").forEach(paragraph => {
+    const chars = Array.from(paragraph);
+    let line = "";
+    chars.forEach(char => {
+      const testLine = line + char;
+      if (ctx.measureText(testLine).width > maxWidth && line) {
+        ctx.fillText(line, x, currentY);
+        line = char;
+        currentY += lineHeight;
+      } else {
+        line = testLine;
+      }
+    });
+    if (line) {
       ctx.fillText(line, x, currentY);
-      line = char;
       currentY += lineHeight;
-    } else {
-      line = testLine;
     }
   });
-  if (line) ctx.fillText(line, x, currentY);
-  return currentY + lineHeight;
+  return currentY;
 }
 
 function storeReceipt() {
@@ -752,7 +944,11 @@ function showCleanResult() {
   npcLine.textContent = "洗护完成，点一下生成小票，把这次清洗收好。";
 }
 
+preloadBubbleImages();
+bindBackgroundMusicUnlock();
+
 document.getElementById("startBtn").addEventListener("click", () => {
+  startBackgroundMusic();
   setScene("room");
   if (!gameState.analysis) resetWashProgress();
   setRoomStep("wide");
@@ -767,7 +963,8 @@ document.querySelector("[data-action='backHome']").addEventListener("click", () 
 basketHotspot.addEventListener("click", () => {
   if (gameState.roomStep === "wide") {
     setRoomStep("basket");
-    setTimeout(() => emotionInput.focus(), 420);
+    playBasketFocusAnimation();
+    setTimeout(() => emotionInput.focus(), 1220);
   }
 });
 
@@ -899,7 +1096,7 @@ sinkHotspot.addEventListener("click", () => {
 });
 
 lineHotspot.addEventListener("click", () => {
-  if (gameState.roomStep === "recompose") npcLine.textContent = "衣服已经晾好了，先把词卡摆成一句话。";
+  if (gameState.roomStep === "microBubble") npcLine.textContent = "先把这些泡泡戳开，洗衣机会继续处理。";
 });
 
 const hangZone = document.getElementById("hangZone");
