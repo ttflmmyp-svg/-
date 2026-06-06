@@ -9,6 +9,7 @@ const apiLoading = document.getElementById("apiLoading");
 const submitEmotionBtn = document.getElementById("submitEmotion");
 const miniCloth = document.getElementById("miniCloth");
 const washerInsideScene = document.getElementById("washerInsideScene");
+const washerDrumScene = document.getElementById("washerDrumScene");
 const npcLine = document.getElementById("npcLine");
 const roomShell = document.querySelector(".room-shell");
 const basketHotspot = document.getElementById("basketHotspot");
@@ -30,6 +31,14 @@ const cleanClothImage = document.getElementById("cleanClothImage");
 const sentenceBuild = document.getElementById("sentenceBuild");
 const cardTray = document.getElementById("cardTray");
 const packReceiptBtn = document.getElementById("packReceiptBtn");
+const dryingScene = document.getElementById("dryingScene");
+const dryingEnterBtn = document.getElementById("dryingEnterBtn");
+const dryingRackArea = document.getElementById("dryingRackArea");
+const dryingTarget = document.getElementById("dryingTarget");
+const dryingHungLayer = document.getElementById("dryingHungLayer");
+const dryingCloth = document.getElementById("dryingCloth");
+const dryingSparkles = document.getElementById("dryingSparkles");
+const roomStage = document.querySelector(".room-stage");
 const CLOTH_ASSET_VERSION = "202606061932";
 const CLEAN_ASSET_VERSION = "202606061949";
 const BUBBLE_ASSET_PATH = "assets/bubbles/";
@@ -38,9 +47,29 @@ const BG_MUSIC_SRC = "../Tidy_Little_Victories.mp3";
 const clothAsset = fileName => `../素材照片文件夹/${fileName}?v=${CLOTH_ASSET_VERSION}`;
 const cleanAsset = fileName => `../新照片素材/${fileName}?v=${CLEAN_ASSET_VERSION}`;
 const washerInsideAsset = fileName => `../衣服进洗衣机/${fileName}?v=2026060706`;
+const WASHER_DRUM_ASSET_VERSION = "2026060708";
+const washerDrumFrames = Array.from(
+  { length: 10 },
+  (_, index) => `./assets/washer-drum/frame_${String(index + 1).padStart(2, "0")}.png?v=${WASHER_DRUM_ASSET_VERSION}`
+);
 const DETERGENT_ASSET_VERSION = "2026060707";
 const detergentFrameAsset = (key, index) =>
   `./assets/detergent/frames/${key}/frame_${String(index).padStart(2, "0")}.png?v=${DETERGENT_ASSET_VERSION}`;
+const detergentPourFrameAsset = (key, index) =>
+  `./assets/detergent/padded-frames/${key}/frame_${String(index).padStart(2, "0")}.png?v=2026060709`;
+const DRYING_ASSET_VERSION = "2026060710";
+const dryingCutoutAsset = fileName => `./assets/drying/cutout/${fileName}?v=${DRYING_ASSET_VERSION}`;
+const dryingClipSrc = dryingCutoutAsset("微信图片_20260607034739_39593_572.png");
+const dryingFallbackClothes = [
+  "微信图片_20260606191048_3162_1219.png",
+  "微信图片_20260606191057_3163_1219.png",
+  "微信图片_20260606191105_3164_1219.png",
+  "微信图片_20260606191111_3165_1219.png",
+  "微信图片_20260606191119_3166_1219.png",
+  "微信图片_20260606191126_3167_1219.png",
+  "微信图片_20260606191134_3168_1219.png",
+  "微信图片_20260606191143_3169_1219.png"
+].map(dryingCutoutAsset);
 const bubbleAsset = fileName => `${BUBBLE_ASSET_PATH}${fileName}`;
 const bubblePopFrames = [
   "anim_bubble_pop_01.png",
@@ -51,6 +80,7 @@ const bubblePopFrames = [
   "anim_bubble_pop_06.png",
   "anim_bubble_pop_07.png"
 ].map(bubbleAsset);
+const bubblePopFrameImages = [];
 const basketFocusFrames = [
   "1.png",
   "2.png",
@@ -96,15 +126,10 @@ bgMusic.volume = 0.36;
 let bgMusicStarted = false;
 
 const bubbleStageSlots = [
-  { x: 49, y: 31, baseSize: 29, role: "hero", z: 8 },
-  { x: 29, y: 42, baseSize: 24, role: "main", z: 7 },
-  { x: 70, y: 45, baseSize: 24, role: "main", z: 7 },
-  { x: 43, y: 59, baseSize: 22, role: "main", z: 7 },
-  { x: 63, y: 66, baseSize: 21, role: "main", z: 7 },
-  { x: 20, y: 28, baseSize: 15, role: "echo", z: 4 },
-  { x: 80, y: 30, baseSize: 14, role: "echo", z: 4 },
-  { x: 22, y: 63, baseSize: 16, role: "echo", z: 4 },
-  { x: 80, y: 70, baseSize: 15, role: "echo", z: 4 }
+  { x: 49, y: 31, baseSize: 28, role: "hero", z: 8 },
+  { x: 31, y: 48, baseSize: 22, role: "main", z: 7 },
+  { x: 68, y: 47, baseSize: 22, role: "main", z: 7 },
+  { x: 51, y: 65, baseSize: 20, role: "main", z: 7 }
 ];
 
 const rules = [
@@ -417,8 +442,195 @@ const gameState = {
   composedSentence: "",
   basketFocusTimer: null,
   apiStatus: "idle",
-  apiResult: null
+  apiResult: null,
+  drumReady: false
 };
+
+let washerDrumFrameIndex = 0;
+let coachTimer = null;
+let stageMeter = null;
+let stageMeterFill = null;
+let stageMeterLabel = null;
+let stageMotionButton = null;
+let washerPointerActive = false;
+let washerMotionActive = false;
+let lastWasherMotion = null;
+let lastWasherOrientation = null;
+
+function haptic(pattern = 18) {
+  if (navigator.vibrate) navigator.vibrate(pattern);
+}
+
+function showCoach(message, duration = 1700) {
+  let coach = document.querySelector(".coach-toast");
+  if (!coach) {
+    coach = document.createElement("div");
+    coach.className = "coach-toast";
+    coach.setAttribute("role", "status");
+    roomStage.appendChild(coach);
+  }
+  coach.textContent = message;
+  coach.classList.add("show");
+  window.clearTimeout(coachTimer);
+  coachTimer = window.setTimeout(() => coach.classList.remove("show"), duration);
+}
+
+function ensureStageMeter() {
+  if (stageMeter) return;
+  stageMeter = document.createElement("div");
+  stageMeter.className = "stage-meter";
+  stageMeter.innerHTML = `
+    <div class="stage-meter-copy">
+      <b>滚筒蓄力</b>
+      <span>点按或滑动滚筒</span>
+    </div>
+    <div class="stage-meter-track"><span></span></div>
+    <button class="stage-motion-button" type="button">摇一摇</button>
+  `;
+  stageMeterFill = stageMeter.querySelector(".stage-meter-track span");
+  stageMeterLabel = stageMeter.querySelector(".stage-meter-copy span");
+  stageMotionButton = stageMeter.querySelector(".stage-motion-button");
+  stageMotionButton.addEventListener("click", startWasherMotionMode);
+  roomStage.appendChild(stageMeter);
+}
+
+function updateStageMeter(value = gameState.drum, label = "点按或滑动滚筒") {
+  ensureStageMeter();
+  stageMeter.style.setProperty("--meter", `${Math.max(0, Math.min(100, value))}%`);
+  if (stageMeterFill) stageMeterFill.style.width = `${Math.max(0, Math.min(100, value))}%`;
+  if (stageMeterLabel) stageMeterLabel.textContent = label;
+}
+
+function setStageMeterVisible(visible) {
+  ensureStageMeter();
+  stageMeter.classList.toggle("show", visible);
+}
+
+function stopWasherMotionMode() {
+  if (!washerMotionActive) return;
+  washerMotionActive = false;
+  lastWasherMotion = null;
+  lastWasherOrientation = null;
+  window.removeEventListener("devicemotion", handleWasherMotion);
+  window.removeEventListener("deviceorientation", handleWasherOrientation);
+  if (stageMotionButton) {
+    stageMotionButton.classList.remove("active");
+    stageMotionButton.textContent = "摇一摇";
+  }
+}
+
+async function startWasherMotionMode() {
+  if (gameState.roomStep !== "washer" || gameState.drumReady) return;
+
+  try {
+    if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+      const permission = await DeviceMotionEvent.requestPermission();
+      if (permission !== "granted") {
+        showCoach("没有获得动作传感器权限，先用点按/滑动也可以");
+        return;
+      }
+    }
+
+    if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+      await DeviceOrientationEvent.requestPermission().catch(() => "denied");
+    }
+
+    washerMotionActive = true;
+    lastWasherMotion = null;
+    lastWasherOrientation = null;
+    window.addEventListener("devicemotion", handleWasherMotion, { passive: true });
+    window.addEventListener("deviceorientation", handleWasherOrientation, { passive: true });
+    if (stageMotionButton) {
+      stageMotionButton.classList.add("active");
+      stageMotionButton.textContent = "摇动中";
+    }
+    showCoach("摇动手机，滚筒会跟着加速");
+  } catch (error) {
+    showCoach("当前浏览器不支持陀螺仪，先用点按/滑动");
+  }
+}
+
+function handleWasherMotion(event) {
+  if (!washerMotionActive || gameState.roomStep !== "washer" || gameState.drumReady) return;
+  const source = event.accelerationIncludingGravity || event.acceleration;
+  if (!source) return;
+
+  const current = {
+    x: source.x || 0,
+    y: source.y || 0,
+    z: source.z || 0
+  };
+
+  if (!lastWasherMotion) {
+    lastWasherMotion = current;
+    return;
+  }
+
+  const delta =
+    Math.abs(current.x - lastWasherMotion.x) +
+    Math.abs(current.y - lastWasherMotion.y) +
+    Math.abs(current.z - lastWasherMotion.z);
+
+  lastWasherMotion = current;
+
+  if (delta > 4.8) {
+    addWasherDrumProgress(Math.min(7.5, (delta - 4.2) * 0.42));
+  }
+}
+
+function handleWasherOrientation(event) {
+  if (!washerMotionActive || gameState.roomStep !== "washer" || gameState.drumReady) return;
+  const current = {
+    alpha: event.alpha || 0,
+    beta: event.beta || 0,
+    gamma: event.gamma || 0
+  };
+
+  if (!lastWasherOrientation) {
+    lastWasherOrientation = current;
+    return;
+  }
+
+  const delta =
+    Math.abs(current.alpha - lastWasherOrientation.alpha) * 0.12 +
+    Math.abs(current.beta - lastWasherOrientation.beta) +
+    Math.abs(current.gamma - lastWasherOrientation.gamma);
+
+  lastWasherOrientation = current;
+
+  if (delta > 9) {
+    addWasherDrumProgress(Math.min(5.5, (delta - 8) * 0.22));
+  }
+}
+
+function preloadWasherDrumFrames() {
+  washerDrumFrames.forEach(src => {
+    const image = new Image();
+    image.src = src;
+  });
+}
+
+function isWasherDrumActive() {
+  return ["washer", "detergent", "microBubble"].includes(gameState.roomStep)
+    || roomShell.classList.contains("pouring-detergent")
+    || roomShell.classList.contains("detergent-poured");
+}
+
+function tickWasherDrum() {
+  if (!washerDrumScene) return;
+  if (!isWasherDrumActive()) {
+    washerDrumScene.src = washerDrumFrames[0];
+    return;
+  }
+  const step = gameState.roomStep === "washer"
+    ? Math.max(1, Math.floor(1 + gameState.drum / 30))
+    : 1;
+  washerDrumFrameIndex = (washerDrumFrameIndex + step) % washerDrumFrames.length;
+  washerDrumScene.src = washerDrumFrames[washerDrumFrameIndex];
+}
+
+preloadWasherDrumFrames();
+window.setInterval(tickWasherDrum, 130);
 
 function setScene(name) {
   scenes.forEach(scene => scene.classList.toggle("active", scene.dataset.scene === name));
@@ -454,6 +666,7 @@ function setPanel(name) {
     };
     npcLine.textContent = hints[name] || "";
     if (name === "detergent") resetDetergentBottlePosition();
+    setStageMeterVisible(false);
     dots.forEach(dot => dot.classList.toggle("active", dot.dataset.dot === "wash"));
   }
 }
@@ -474,7 +687,13 @@ function setRoomStep(step) {
     npcLine.textContent = "这件衣服准备好了，送去洗衣机吧。";
   }
   if (step === "washer") {
-    npcLine.textContent = "投递成功，先给它倒一点洗涤剂。";
+    npcLine.textContent = "点按或滑动滚筒，让这件心事先转起来。";
+    updateStageMeter(gameState.drum, "点按或滑动滚筒");
+    setStageMeterVisible(true);
+    showCoach("先让滚筒转满，再倒洗涤剂");
+  } else {
+    setStageMeterVisible(false);
+    stopWasherMotionMode();
   }
   if (step === "detergent") {
     npcLine.textContent = "洗涤剂准备好了，点一下瓶子开始倒入。";
@@ -484,6 +703,9 @@ function setRoomStep(step) {
   }
   if (step === "recompose") {
     npcLine.textContent = "把这几张词卡重新排成一句你愿意带走的话。";
+  }
+  if (step === "drying") {
+    npcLine.textContent = "点一下晾衣架，再把衣服拖过去晾好。";
   }
 }
 
@@ -517,7 +739,9 @@ function resetWashProgress() {
   gameState.composedSentence = "";
   gameState.apiStatus = "idle";
   gameState.apiResult = null;
-  roomShell.classList.remove("show-clean-result", "show-recompose", "micro-complete", "cloth-inside-ready", "pouring-detergent", "detergent-target-hot", "detergent-poured");
+  gameState.drumReady = false;
+  stopWasherMotionMode();
+  roomShell.classList.remove("show-clean-result", "show-recompose", "show-drying", "micro-complete", "cloth-inside-ready", "pouring-detergent", "detergent-target-hot", "detergent-poured");
   const soapMeter = document.getElementById("soapMeter");
   const spinMeter = document.getElementById("spinMeter");
   if (soapMeter) soapMeter.style.width = "0%";
@@ -527,6 +751,8 @@ function resetWashProgress() {
   if (microBubbleField) microBubbleField.innerHTML = "";
   if (sentenceBuild) sentenceBuild.innerHTML = "";
   if (cardTray) cardTray.innerHTML = "";
+  updateStageMeter(0, "点按或滑动滚筒");
+  setStageMeterVisible(false);
 }
 
 function prepareThrow() {
@@ -542,7 +768,7 @@ function prepareThrow() {
     detergentImage.alt = rule.detergentName;
   }
   if (detergentPourFrame) {
-    detergentPourFrame.src = detergentFrameAsset(rule.detergentKey, 1);
+    detergentPourFrame.src = detergentPourFrameAsset(rule.detergentKey, 1);
   }
   document.getElementById("clothEmoji").textContent = rule.emoji;
   document.getElementById("clothName").textContent = rule.cloth;
@@ -623,6 +849,10 @@ function preloadBubbleImages() {
   ].forEach(src => {
     const img = new Image();
     img.src = src;
+    if (bubblePopFrames.includes(src)) {
+      bubblePopFrameImages[bubblePopFrames.indexOf(src)] = img;
+    }
+    if (img.decode) img.decode().catch(() => {});
   });
 }
 
@@ -754,24 +984,48 @@ function popMicroBubble(button, image, card) {
   playPopSound();
   npcLine.textContent = `“${card.harsh}”被戳破了。`;
 
-  let frame = 0;
-  image.src = bubblePopFrames[frame];
+  playBubblePopFrames(image, () => {
+    button.dataset.state = "gone";
+    button.classList.remove("is-popping");
+    button.classList.add("is-gone");
+    gameState.poppedBubbles += 1;
+    if (gameState.poppedBubbles >= gameState.microCards.length) {
+      setTimeout(completeMicroBubbles, 520);
+    }
+  });
+}
 
-  const timer = window.setInterval(() => {
-    frame += 1;
-    if (frame >= bubblePopFrames.length) {
-      window.clearInterval(timer);
-      button.dataset.state = "gone";
-      button.classList.remove("is-popping");
-      button.classList.add("is-gone");
-      gameState.poppedBubbles += 1;
-      if (gameState.poppedBubbles >= gameState.microCards.length) {
-        setTimeout(completeMicroBubbles, 520);
-      }
+function playBubblePopFrames(image, onComplete) {
+  const frameDuration = 88;
+  let frame = 0;
+  let lastFrameTime = 0;
+
+  const setFrame = index => {
+    const cached = bubblePopFrameImages[index];
+    image.src = cached ? cached.src : bubblePopFrames[index];
+  };
+
+  setFrame(frame);
+
+  const tick = timestamp => {
+    if (!lastFrameTime) lastFrameTime = timestamp;
+    if (timestamp - lastFrameTime < frameDuration) {
+      requestAnimationFrame(tick);
       return;
     }
-    image.src = bubblePopFrames[frame];
-  }, 58);
+
+    lastFrameTime = timestamp;
+    frame += 1;
+    if (frame >= bubblePopFrames.length) {
+      onComplete();
+      return;
+    }
+
+    setFrame(frame);
+    requestAnimationFrame(tick);
+  };
+
+  requestAnimationFrame(tick);
 }
 
 
@@ -781,8 +1035,153 @@ function completeMicroBubbles() {
   npcLine.textContent = "泡泡洗掉了，正在打印今天的小票。";
   setTimeout(() => {
     microFlash.classList.remove("flash");
-    finishReceipt();
+    beginDryingBeforeReceipt();
   }, 920);
+}
+
+let dryingDrag = null;
+let dryingEntered = false;
+let dryingFinished = false;
+let dryingSelectedCloth = null;
+
+function getDryingSelectedCloth() {
+  const input = window.dryingInput;
+  const direct = input?.cloth || input?.selectedCloth;
+  if (direct?.src) return { id: direct.id || "recognized_1", src: direct.src };
+
+  if (Array.isArray(input?.clothes) && input.clothes.length) {
+    const candidates = input.clothes.filter(item => item?.src);
+    const picked = candidates[Math.floor(Math.random() * candidates.length)];
+    if (picked) return { id: picked.id || "recognized_1", src: picked.src };
+  }
+
+  const rule = gameState.analysis || fallbackRule;
+  const cleanSrc = rule.cleanAsset || cleanClothImage?.src;
+  if (cleanSrc) return { id: rule.type || "clean_cloth", src: cleanSrc };
+
+  const fallback = dryingFallbackClothes[Math.floor(Math.random() * dryingFallbackClothes.length)];
+  return { id: "fallback_random", src: fallback };
+}
+
+function resetDryingScene() {
+  dryingDrag = null;
+  dryingEntered = false;
+  dryingFinished = false;
+  dryingSelectedCloth = getDryingSelectedCloth();
+  dryingScene.classList.remove("entered");
+  dryingTarget.classList.remove("hot");
+  dryingSparkles.classList.remove("show");
+  dryingHungLayer.innerHTML = "";
+  dryingCloth.classList.remove("dragging", "done");
+  dryingCloth.style.left = "";
+  dryingCloth.style.top = "";
+  dryingCloth.src = dryingSelectedCloth.src;
+  dryingCloth.dataset.id = dryingSelectedCloth.id;
+}
+
+function beginDryingBeforeReceipt() {
+  if (!dryingScene) {
+    finishReceipt();
+    return;
+  }
+
+  resetDryingScene();
+  roomShell.classList.add("show-drying");
+  setRoomStep("drying");
+  npcLine.textContent = "把洗好的衣服晾起来，小票就会出来。";
+}
+
+function enterDryingScene() {
+  if (dryingEntered || !dryingScene) return;
+  dryingEntered = true;
+  dryingScene.classList.add("entered");
+}
+
+function startDryingDrag(event) {
+  if (!dryingEntered || dryingFinished || (event.button !== undefined && event.button !== 0)) return;
+  dryingDrag = { item: event.currentTarget };
+  dryingDrag.item.setPointerCapture(event.pointerId);
+  dryingDrag.item.classList.add("dragging");
+  moveDryingDrag(event);
+  window.addEventListener("pointermove", moveDryingDrag);
+  window.addEventListener("pointerup", endDryingDrag, { once: true });
+}
+
+function moveDryingDrag(event) {
+  if (!dryingDrag) return;
+  dryingDrag.item.style.left = `${event.clientX}px`;
+  dryingDrag.item.style.top = `${event.clientY}px`;
+  dryingTarget.classList.toggle("hot", isInsideDryingTarget(event.clientX, event.clientY));
+}
+
+function endDryingDrag(event) {
+  if (!dryingDrag) return;
+  window.removeEventListener("pointermove", moveDryingDrag);
+  dryingTarget.classList.remove("hot");
+
+  if (isInsideDryingTarget(event.clientX, event.clientY)) {
+    hangDryingCloth();
+  } else {
+    resetDryingClothPosition();
+  }
+  dryingDrag = null;
+}
+
+function isInsideDryingTarget(clientX, clientY) {
+  const rect = dryingRackArea.getBoundingClientRect();
+  return clientX >= rect.left + rect.width * .02 &&
+    clientX <= rect.left + rect.width * .96 &&
+    clientY >= rect.top + rect.height * .22 &&
+    clientY <= rect.bottom + rect.height * .28;
+}
+
+function resetDryingClothPosition() {
+  dryingCloth.classList.remove("dragging");
+  dryingCloth.style.left = "";
+  dryingCloth.style.top = "";
+}
+
+function hangDryingCloth() {
+  dryingFinished = true;
+  dryingCloth.classList.remove("dragging");
+  dryingCloth.classList.add("done");
+
+  const slot = document.createElement("div");
+  slot.className = "drying-hung-slot";
+
+  const leftClip = document.createElement("img");
+  leftClip.className = "drying-clip left";
+  leftClip.src = dryingClipSrc;
+  leftClip.alt = "";
+
+  const rightClip = document.createElement("img");
+  rightClip.className = "drying-clip right";
+  rightClip.src = dryingClipSrc;
+  rightClip.alt = "";
+
+  const hung = document.createElement("img");
+  hung.className = "drying-hung-cloth";
+  hung.src = dryingSelectedCloth.src;
+  hung.alt = "";
+
+  slot.append(leftClip, rightClip, hung);
+  dryingHungLayer.appendChild(slot);
+  dryingSparkles.classList.add("show");
+
+  setTimeout(finishDrying, 650);
+}
+
+function finishDrying() {
+  const detail = {
+    state: "receipt",
+    completed: 1,
+    total: 1,
+    cloth: dryingSelectedCloth
+  };
+  window.dispatchEvent(new CustomEvent("receipt", { detail }));
+  window.onDryingComplete?.(detail);
+  roomShell.classList.remove("show-drying");
+  finishReceipt();
 }
 
 function shuffleCards(cards) {
@@ -1044,7 +1443,7 @@ document.getElementById("startBtn").addEventListener("click", () => {
 });
 
 document.querySelector("[data-action='backHome']").addEventListener("click", () => {
-  roomShell.classList.remove("show-recompose", "micro-complete", "pouring-detergent", "basket-focus-dismissed", "basket-input-ready");
+  roomShell.classList.remove("show-recompose", "show-drying", "micro-complete", "pouring-detergent", "basket-focus-dismissed", "basket-input-ready");
   setScene("home");
   setRoomStep("wide");
 });
@@ -1139,12 +1538,45 @@ function sendClothToWasher() {
   setTimeout(() => {
     roomShell.classList.add("cloth-inside-ready");
     miniCloth.classList.remove("visible");
+    showCoach("点按滚筒，或者在滚筒上来回滑动");
   }, 680);
-  setTimeout(() => setPanel("detergent"), 980);
+  updateStageMeter(0, "点按或滑动滚筒");
 }
 
 document.getElementById("clothCard").addEventListener("click", sendClothToWasher);
 washerHotspot.addEventListener("click", sendClothToWasher);
+
+function addWasherDrumProgress(amount) {
+  if (gameState.roomStep !== "washer" || gameState.drumReady) return;
+  gameState.drum = Math.min(100, gameState.drum + amount);
+  updateStageMeter(gameState.drum, gameState.drum >= 100 ? "可以倒洗涤剂了" : "继续，让它转起来");
+  haptic(8);
+  if (gameState.drum >= 100) {
+    gameState.drumReady = true;
+    stopWasherMotionMode();
+    npcLine.textContent = "滚筒热起来了，现在把洗涤剂倒进去。";
+    showCoach("滚筒准备好了，去拖动洗涤剂瓶");
+    setTimeout(() => setPanel("detergent"), 420);
+  }
+}
+
+washerHotspot.addEventListener("pointerdown", event => {
+  if (gameState.roomStep !== "washer") return;
+  washerPointerActive = true;
+  washerHotspot.setPointerCapture(event.pointerId);
+  addWasherDrumProgress(16);
+  event.preventDefault();
+});
+
+washerHotspot.addEventListener("pointermove", () => {
+  if (washerPointerActive) addWasherDrumProgress(3.2);
+});
+
+["pointerup", "pointercancel", "pointerleave"].forEach(eventName => {
+  washerHotspot.addEventListener(eventName, () => {
+    washerPointerActive = false;
+  });
+});
 
 let detergentDragging = false;
 let detergentMoved = false;
@@ -1185,7 +1617,7 @@ function isDetergentOverWasher(point) {
 function playDetergentFrames(rule) {
   if (!detergentPourFrame) return;
   let frameIndex = 1;
-  detergentPourFrame.src = detergentFrameAsset(rule.detergentKey, frameIndex);
+  detergentPourFrame.src = detergentPourFrameAsset(rule.detergentKey, frameIndex);
   detergentPourTimer = window.setInterval(() => {
     frameIndex += 1;
     if (frameIndex > 6) {
@@ -1193,7 +1625,7 @@ function playDetergentFrames(rule) {
       detergentPourTimer = null;
       return;
     }
-    detergentPourFrame.src = detergentFrameAsset(rule.detergentKey, frameIndex);
+    detergentPourFrame.src = detergentPourFrameAsset(rule.detergentKey, frameIndex);
   }, 260);
 }
 
@@ -1373,7 +1805,15 @@ if (hangBtn) {
   });
 }
 
-packReceiptBtn.addEventListener("click", finishReceipt);
+if (dryingEnterBtn) {
+  dryingEnterBtn.addEventListener("click", enterDryingScene);
+}
+
+if (dryingCloth) {
+  dryingCloth.addEventListener("pointerdown", startDryingDrag);
+}
+
+packReceiptBtn.addEventListener("click", beginDryingBeforeReceipt);
 document.getElementById("saveReceiptBtn").addEventListener("click", saveReceiptImage);
 
 document.getElementById("restartBtn").addEventListener("click", () => {
@@ -1384,7 +1824,7 @@ document.getElementById("restartBtn").addEventListener("click", () => {
   gameState.analysis = null;
   gameState.receipt = null;
   resetWashProgress();
-  roomShell.classList.remove("show-clean-result", "show-recompose", "micro-complete", "pouring-detergent", "basket-focus-dismissed", "basket-input-ready");
+  roomShell.classList.remove("show-clean-result", "show-recompose", "show-drying", "micro-complete", "pouring-detergent", "basket-focus-dismissed", "basket-input-ready");
   if (cleanCloth) cleanCloth.classList.remove("hung");
   if (packReceiptBtn) packReceiptBtn.disabled = true;
   setScene("room");

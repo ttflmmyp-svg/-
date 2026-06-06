@@ -102,7 +102,8 @@
             </div>
           </div>
           <img class="washer-inside-scene" id="washerInsideScene" src="../衣服进洗衣机/微信图片_20260607034221_225_1677.png?v=2026060706" alt="衣服进入洗衣机后的状态">
-          <img class="detergent-pour-frame detergent-pour-frame-top" id="detergentPourFrameTop" src="./assets/detergent/frames/9418d7519b6c19f679208bad90ca0c21/frame_01.png?v=2026060707" alt="" draggable="false">
+          <img class="washer-drum-scene" id="washerDrumScene" src="./assets/washer-drum/frame_01.png?v=2026060708" alt="" draggable="false" aria-hidden="true">
+          <img class="detergent-pour-frame detergent-pour-frame-top" id="detergentPourFrameTop" src="./assets/detergent/padded-frames/9418d7519b6c19f679208bad90ca0c21/frame_01.png?v=2026060709" alt="" draggable="false">
 
           <p class="room-hint" id="npcLine">点点脏衣篓，把今天放进去。</p>
           <img class="basket-focus-prop" id="basketFocusProp" src="../木桶/微信图片_20260607024905_167_1677.png?v=2026060704" alt="放大的脏衣篓">
@@ -134,6 +135,25 @@
             <div class="card-tray" id="cardTray" aria-label="可以拖拽重组的词卡"></div>
             <button class="receipt-pack-btn recompose-receipt" id="packReceiptBtn" type="button">生成小票</button>
           </div>
+
+          <div class="drying-scene" id="dryingScene" aria-hidden="true">
+            <div class="drying-bg drying-bg-overview"></div>
+            <div class="drying-bg drying-bg-closeup"></div>
+            <button class="drying-rack-click-zone" id="dryingEnterBtn" type="button" aria-label="点击晾衣架开始晾晒"></button>
+            <section class="drying-intro" aria-live="polite">
+              <div class="drying-intro-card">要晾衣服了<br>点一下晾衣架</div>
+            </section>
+            <img class="drying-sun" src="./assets/drying/cutout/微信图片_20260607034737_39592_572.png?v=2026060710" alt="">
+
+            <section class="drying-rack-area" id="dryingRackArea" aria-label="晾衣架">
+              <img class="drying-rack-img" src="./assets/drying/cutout/微信图片_20260607034741_39595_572.png?v=2026060710" alt="">
+              <div class="drying-target" id="dryingTarget"></div>
+              <div class="drying-hung-layer" id="dryingHungLayer"></div>
+            </section>
+
+            <img class="drying-sparkles" id="dryingSparkles" src="./assets/drying/cutout/微信图片_20260607034740_39594_572.png?v=2026060710" alt="">
+            <img class="drying-cloth-source" id="dryingCloth" alt="">
+          </div>
         </div>
 
         <div class="panel panel-wash" data-panel="detergent">
@@ -153,27 +173,378 @@
       </div>
     </section>
 
+    <!-- ===== RECEIPT MODULE START: final receipt page only ===== -->
     <section class="scene scene-receipt" data-scene="receipt">
+      <style>
+        .scene-receipt {
+          display: none;
+          align-content: center;
+          justify-items: center;
+          background: #000;
+        }
+
+        .scene-receipt.active {
+          display: grid;
+        }
+
+        .scene-receipt .receipt-art {
+          position: relative;
+          width: min(100%, 430px, 56.28dvh);
+          aspect-ratio: 941 / 1672;
+          overflow: hidden;
+          background: #8fc5ef;
+        }
+
+        .scene-receipt .receipt-card {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          background: #8fc5ef;
+        }
+
+        .scene-receipt .receipt-card > img {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          user-select: none;
+          -webkit-user-drag: none;
+        }
+
+        .scene-receipt .receipt-copy {
+          position: absolute;
+          left: 16.5%;
+          top: 23.6%;
+          z-index: 2;
+          width: 67%;
+          height: 43.5%;
+          display: grid;
+          align-content: start;
+          gap: clamp(5px, 1.45vw, 9px);
+          padding: clamp(4px, 1.2vw, 7px);
+          color: #2f4f72;
+          text-align: center;
+          font-family: "Comic Sans MS", "Segoe Print", "YouYuan", "KaiTi", "STKaiti", cursive;
+        }
+
+        .scene-receipt .receipt-overline {
+          margin: 0 0 .22em;
+          color: rgba(62, 92, 122, .66);
+          font-size: clamp(8px, 2.35vw, 11px);
+          font-weight: 900;
+          line-height: 1.2;
+          letter-spacing: .14em;
+          font-family: "Trebuchet MS", "Arial", sans-serif;
+        }
+
+        .scene-receipt .receipt-copy h2 {
+          margin: 0;
+          color: #2d5277;
+          font-size: clamp(20px, 5.15vw, 28px);
+          line-height: 1.08;
+          font-weight: 700;
+          letter-spacing: .02em;
+          white-space: nowrap;
+        }
+
+        .scene-receipt .receipt-divider {
+          justify-self: center;
+          width: 90%;
+          height: 1px;
+          margin: clamp(4px, 1.1vw, 7px) 0 clamp(3px, .9vw, 6px);
+          background: repeating-linear-gradient(90deg, rgba(47, 79, 114, .22) 0 7px, transparent 7px 12px);
+        }
+
+        .scene-receipt .receipt-message {
+          display: grid;
+          gap: .3em;
+          min-height: 4.2em;
+          align-content: center;
+        }
+
+        .scene-receipt .receipt-message,
+        .scene-receipt .receipt-message p {
+          margin: 0;
+          color: #355772;
+          font-size: clamp(13px, 3.55vw, 18px);
+          font-weight: 500;
+          line-height: 1.34;
+          white-space: pre-line;
+        }
+
+        .scene-receipt .receipt-details {
+          display: grid;
+          gap: 0;
+          margin-top: clamp(6px, 1.9vw, 11px);
+          padding: .42em 0;
+          border-top: 1px dashed rgba(62, 92, 122, .22);
+          border-bottom: 1px dashed rgba(62, 92, 122, .22);
+        }
+
+        .scene-receipt .receipt-details p {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin: 0;
+          padding: .1em .9em;
+          border-radius: 0;
+          background: transparent;
+          color: #526d82;
+          font-size: clamp(9px, 2.55vw, 12px);
+          line-height: 1.25;
+        }
+
+        .scene-receipt .receipt-details p:nth-child(3) {
+          display: none;
+        }
+
+        .scene-receipt .receipt-details span {
+          flex: 0 0 auto;
+          color: rgba(82, 109, 130, .72);
+          font-weight: 800;
+        }
+
+        .scene-receipt .receipt-details strong {
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-weight: 950;
+        }
+
+        .scene-receipt .receipt-source-card {
+          position: relative;
+          display: grid;
+          gap: .3em;
+          margin-top: clamp(4px, 1.4vw, 8px);
+          padding: .1em .9em .7em;
+          border-radius: 0;
+          background: transparent;
+          color: #5f7486;
+          text-align: left;
+        }
+
+        .scene-receipt .receipt-source-card span {
+          color: rgba(82, 109, 130, .72);
+          font-size: clamp(8px, 2.25vw, 10px);
+          font-weight: 900;
+        }
+
+        .scene-receipt .receipt-source {
+          margin: 0;
+          color: #5f7486 !important;
+          font-size: clamp(9px, 2.55vw, 12px) !important;
+          font-weight: 800 !important;
+          line-height: 1.3 !important;
+        }
+
+        .scene-receipt .receipt-stamp {
+          position: absolute;
+          right: 2%;
+          top: -18%;
+          width: clamp(54px, 14vw, 76px);
+          aspect-ratio: 1;
+          display: grid;
+          place-items: center;
+          border: 3px double rgba(167, 61, 70, .58);
+          border-radius: 50%;
+          color: rgba(167, 61, 70, .72);
+          font-size: clamp(14px, 3.8vw, 20px);
+          font-weight: 800;
+          line-height: 1.08;
+          text-align: center;
+          transform: rotate(-10deg);
+          font-family: "KaiTi", "STKaiti", "Comic Sans MS", cursive;
+        }
+
+        .scene-receipt .receipt-ticket-actions {
+          display: flex;
+          justify-content: center;
+          gap: clamp(28px, 8vw, 48px);
+          margin-top: auto;
+          padding-top: clamp(5px, 1.7vw, 9px);
+          border-top: 1px dashed rgba(62, 92, 122, .22);
+          color: #496d9b;
+          font-size: clamp(12px, 3.25vw, 16px);
+          font-weight: 700;
+        }
+
+        .scene-receipt .receipt-actions {
+          position: absolute;
+          left: 50%;
+          bottom: 0;
+          z-index: 5;
+          display: flex;
+          gap: 10px;
+          transform: translateX(-50%);
+        }
+
+        .scene-receipt .receipt-action {
+          min-width: 44px;
+          min-height: 44px;
+          padding: 0;
+          border: 0;
+          border-radius: 999px;
+          background: transparent;
+          color: transparent;
+          font-size: clamp(13px, 3.5vw, 16px);
+          font-weight: 950;
+          box-shadow: none;
+        }
+
+        .scene-receipt .receipt-restart {
+          position: absolute;
+          left: 50%;
+          bottom: 4.8%;
+          z-index: 4;
+          width: 60%;
+          height: 8%;
+          min-height: 44px;
+          border: 0;
+          border-radius: 999px;
+          background: rgba(0, 95, 190, .02);
+          color: transparent;
+          transform: translateX(-50%);
+        }
+
+        .scene-receipt .receipt-toast {
+          position: absolute;
+          left: 50%;
+          top: 10%;
+          z-index: 8;
+          width: min(78%, 330px);
+          padding: .75em 1em;
+          border-radius: 999px;
+          background: rgba(20, 24, 32, .78);
+          color: #fff;
+          text-align: center;
+          font-size: clamp(12px, 3.4vw, 15px);
+          line-height: 1.45;
+          opacity: 0;
+          pointer-events: none;
+          transform: translate(-50%, -12px);
+          transition: opacity .2s ease, transform .2s ease;
+        }
+
+        .scene-receipt .receipt-toast.show {
+          opacity: 1;
+          transform: translate(-50%, 0);
+        }
+      </style>
+
       <div class="receipt-art">
-        <img id="receiptBg" src="../f88d65fcc0124dd20035a0e1bff06999.png" alt="小票页背景">
-        <div class="receipt-copy">
-          <h2 id="receiptTitle">今日洗护完成</h2>
-          <p id="receiptResult">今天辛苦了，你已经把这件心事认真洗过一遍。</p>
-          <div class="receipt-meta">
-            <span id="receiptEmotion">普通心事</span>
-            <span id="receiptCloth">普通心事 T 恤</span>
-            <span id="cleanIndex">67%</span>
+        <div class="receipt-card" id="receipt-card">
+          <img id="receiptBg" src="../../小票/1、焦虑衬衫.png" alt="小票页背景">
+          <div class="receipt-copy">
+            <p class="receipt-overline">TODAY'S LAUNDRY NOTE</p>
+            <h2 id="receiptTitle">这件心事，洗好了</h2>
+            <span class="receipt-divider" aria-hidden="true"></span>
+            <div class="receipt-message" id="receiptResult">
+              <p>今天也辛苦了。</p>
+              <p>把心事晾一晾，慢慢来。</p>
+            </div>
+            <div class="receipt-details" aria-label="本次洗护信息">
+              <p><span>衣物</span><strong id="receiptCloth">普通心事 T 恤</strong></p>
+              <p><span>情绪</span><strong id="receiptEmotion">普通心事</strong></p>
+              <p><span>洁净度</span><strong id="cleanIndex">67%</strong></p>
+            </div>
+            <div class="receipt-source-card">
+              <span>今天放下的心事</span>
+              <p id="receiptSource" class="receipt-source">“先把这件心事放在这里。”</p>
+              <span class="receipt-stamp" aria-hidden="true">洗护<br>完成</span>
+            </div>
+            <div class="receipt-ticket-actions" aria-hidden="true">
+              <span>♡ 保存小票</span>
+              <span>分享小票</span>
+            </div>
           </div>
-          <p id="receiptSource" class="receipt-source"></p>
         </div>
-        <button class="receipt-save" id="saveReceiptBtn" aria-label="保存小票">保存小票</button>
-        <button class="receipt-restart" id="restartBtn" aria-label="再洗一件">再洗一件</button>
-        <div class="receipt-toast" id="receiptToast">已保存。手机浏览器如未自动下载，可以长按小票截图保存。</div>
+
+        <div class="receipt-actions" aria-label="小票操作">
+          <button class="receipt-action receipt-save" id="saveReceiptBtn" type="button">
+            <span aria-hidden="true">♡</span> 保存小票
+          </button>
+        </div>
+        <button class="receipt-restart" id="restartBtn" type="button" aria-label="再洗一件">再洗一件</button>
+        <div class="receipt-toast" id="receiptToast" role="status" aria-live="polite">已保存。手机浏览器如未自动下载，可以长按小票截图保存。</div>
       </div>
     </section>
+    <!-- ===== RECEIPT MODULE END ===== -->
   </main>
 
   <script src="api.js"></script>
   <script src="script.js"></script>
+  <script src="../../data/receiptTexts.js"></script>
+  <script>
+    // Receipt override: keep the final page driven by the fixed copy and eight receipt backgrounds.
+    (() => {
+      const receiptBackgrounds = {
+        anxiety: "../../小票/1、焦虑衬衫.png",
+        anger: "../../小票/2、愤怒袜子.png",
+        fatigue: "../../小票/3、疲惫外套.png",
+        sadness: "../../小票/4、委屈毛衣.png",
+        confusion: "../../小票/5、迷茫围巾.png",
+        loneliness: "../../小票/6、孤独手套.png",
+        breakdown: "../../小票/7、崩溃睡衣.png",
+        rumination: "../../小票/8、内耗线团.png",
+        default: "../../小票/1、焦虑衬衫.png"
+      };
+
+      function getReceiptContent(emotionKey) {
+        if (window.ReceiptTextModule?.getReceiptContent) {
+          return window.ReceiptTextModule.getReceiptContent(emotionKey, 2);
+        }
+
+        return {
+          label: "普通心事",
+          cloth: "普通心事 T 恤",
+          lines: ["今天也辛苦了。", "把心事晾一晾。"]
+        };
+      }
+
+      function writeReceiptLines(lines) {
+        const receiptResult = document.getElementById("receiptResult");
+        receiptResult.innerHTML = "";
+        lines.forEach(line => {
+          const paragraph = document.createElement("p");
+          paragraph.textContent = line;
+          receiptResult.appendChild(paragraph);
+        });
+      }
+
+      finishReceipt = function finishReceiptFromFixedTicketData() {
+        const rule = gameState.analysis || fallbackRule;
+        const receiptContent = getReceiptContent(rule.type);
+        const background = receiptBackgrounds[rule.type] || receiptBackgrounds.default;
+        const source = gameState.userText.length > 34 ? `${gameState.userText.slice(0, 34)}...` : gameState.userText;
+
+        gameState.cleanIndex = Math.floor(72 + Math.random() * 20);
+        gameState.receipt = {
+          title: "这件心事，洗好了",
+          result: receiptContent.lines.join("\n"),
+          emotion: receiptContent.label,
+          cloth: receiptContent.cloth,
+          cleanIndex: `${gameState.cleanIndex}%`,
+          source: source ? `“${source}”` : "“小”",
+          suggestion: "",
+          cards: gameState.microCards.map(card => card.gentle),
+          composedSentence: gameState.composedSentence || gameState.buildCards.map(card => card.text).join(""),
+          background,
+          createdAt: new Date().toISOString()
+        };
+
+        document.getElementById("receiptBg").src = background;
+        document.getElementById("receiptTitle").textContent = gameState.receipt.title;
+        document.getElementById("receiptCloth").textContent = gameState.receipt.cloth;
+        document.getElementById("receiptEmotion").textContent = gameState.receipt.emotion;
+        document.getElementById("receiptSource").textContent = gameState.receipt.source;
+        document.getElementById("cleanIndex").textContent = gameState.receipt.cleanIndex;
+        writeReceiptLines(receiptContent.lines);
+        setScene("receipt");
+      };
+    })();
+  </script>
 </body>
 </html>

@@ -1,0 +1,12 @@
+{
+  "name": "emotion-laundry-simple",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "html-to-image": "^1.11.13"
+  }
+}

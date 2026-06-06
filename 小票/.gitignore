@@ -1,0 +1,5 @@
+# ===== RECEIPT EXPORT MODULE START: generated dependency/build folders =====
+node_modules/
+dist/
+!vendor/
+# ===== RECEIPT EXPORT MODULE END =====
