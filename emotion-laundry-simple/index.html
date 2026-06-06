@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>把今天洗一下 - 简单原型</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app game-screen" aria-live="polite">
+    <div class="progress" aria-label="清洗进度">
+      <span data-dot="home" class="active"></span>
+      <span data-dot="input"></span>
+      <span data-dot="wash"></span>
+      <span data-dot="receipt"></span>
+    </div>
+
+    <section class="scene scene-home active" data-scene="home">
+      <div class="home-art">
+        <img src="../95fdffd95a51e2d862a4599d973427f5.png" alt="欢迎来到情绪洗衣房，今天有什么想法需要洗一洗？">
+        <button class="art-start-btn" id="startBtn" aria-label="开始洗衣">开始洗衣</button>
+      </div>
+    </section>
+
+    <section class="scene scene-room" data-scene="room">
+      <div class="room room-shell" data-room-step="wide">
+        <button class="room-back" data-action="backHome" type="button" aria-label="回首页">‹</button>
+
+        <div class="room-stage">
+          <div class="room-camera" id="roomCamera">
+            <div class="room-layer">
+              <img class="room-bg" src="../8af662ac33f244492da430b286ada5ea.png" alt="温馨的情绪洗衣房">
+              <div class="back-wall"></div>
+              <div class="floor-grid"></div>
+              <div class="sun-window"><span></span></div>
+              <div class="mushroom-lamp"></div>
+
+              <div class="soft-sink">
+                <div class="sink-basin"></div>
+                <div class="sink-faucet"></div>
+                <div class="sink-soap">肥皂</div>
+              </div>
+
+              <div class="drying-rod">
+                <span class="dry-shirt mint"></span>
+                <span class="dry-shirt cream"></span>
+                <span class="dry-shirt blue"></span>
+              </div>
+
+              <div class="tiny-shelf">
+                <span class="detergent"></span>
+                <span class="plant"></span>
+                <span class="note-heart">♡</span>
+              </div>
+
+              <div class="soft-basket" id="basket">
+                <span class="basket-rim"></span>
+                <span class="basket-shirt one"></span>
+                <span class="basket-shirt two"></span>
+                <span class="basket-shirt edge"></span>
+              </div>
+
+              <div class="room-washer">
+                <div class="washer-stickers"><span>★</span><span>☺</span></div>
+                <div class="folded-rag"></div>
+                <div class="washer-window" id="washerWindow">
+                  <div class="water"></div>
+                </div>
+              </div>
+
+              <button class="generated-cloth" id="clothCard" type="button" aria-label="把衣服送去洗衣机">
+                <img id="clothImage" src="../素材照片文件夹/1、迷茫衬衫.png?v=202606061932" alt="">
+                <span id="clothEmoji">👕</span>
+                <b id="clothName">普通心事 T 恤</b>
+              </button>
+              <div class="mini-cloth bg-mini-cloth" id="miniCloth">
+                <img id="miniClothImage" src="../素材照片文件夹/1、迷茫衬衫.png?v=202606061932" alt="">
+              </div>
+              <button class="detergent-bottle" id="detergentBottle" type="button" aria-label="倒入洗涤剂">
+                <span class="bottle-cap"></span>
+                <span class="bottle-body">
+                  <b id="detergentLabel">慢慢来洗衣液</b>
+                </span>
+              </button>
+              <div class="detergent-drops" id="detergentDrops" aria-hidden="true">
+                <span></span><span></span><span></span>
+              </div>
+              <div class="washer-foam" id="washerFoam" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+
+              <button class="basket-hotspot" id="basketHotspot" type="button" aria-label="点击脏衣篓"></button>
+              <button class="washer-hotspot" id="washerHotspot" type="button" aria-label="点击洗衣机"></button>
+              <button class="sink-hotspot" id="sinkHotspot" type="button" aria-label="点击洗手池"></button>
+              <button class="line-hotspot" id="lineHotspot" type="button" aria-label="点击晾衣杆"></button>
+            </div>
+          </div>
+
+          <p class="room-hint" id="npcLine">点点脏衣篓，把今天放进去。</p>
+
+          <div class="emotion-note" id="emotionNote">
+            <label for="emotionInput">今天想洗掉什么？</label>
+            <textarea id="emotionInput" maxlength="120" placeholder="比如：我今天很焦虑，感觉什么都来不及。"></textarea>
+            <div class="note-actions">
+              <span id="inputCount">0 / 120</span>
+              <button class="note-submit" id="submitEmotion" type="button">放进去</button>
+            </div>
+            <p class="error" id="inputError"></p>
+          </div>
+
+          <div class="micro-bubble-scene" id="microBubbleScene" aria-hidden="true">
+            <div class="micro-water"></div>
+            <div class="micro-cloth-shadow"></div>
+            <div class="micro-bubble-field" id="microBubbleField"></div>
+            <div class="micro-flash" id="microFlash"></div>
+          </div>
+
+          <div class="recompose-scene" id="recomposeScene" aria-hidden="true">
+            <div class="clean-focus">
+              <img id="cleanClothImage" src="../新照片素材/迷茫衬衫.png?v=202606061949" alt="洗好的开心衣服">
+            </div>
+            <div class="sentence-build" id="sentenceBuild" aria-label="重新组合后的句子"></div>
+            <div class="card-tray" id="cardTray" aria-label="可以拖拽重组的词卡"></div>
+            <button class="receipt-pack-btn recompose-receipt" id="packReceiptBtn" type="button">生成小票</button>
+          </div>
+        </div>
+
+        <div class="panel panel-wash" data-panel="detergent">
+          <h3>第一步：倒入洗涤剂</h3>
+          <p id="detergentHint">点击洗涤剂瓶，让这件心事开始起泡。</p>
+        </div>
+
+        <div class="panel panel-wash" data-panel="microBubble">
+          <h3>第二步：戳破泡泡</h3>
+          <p>把 3 个重重的想法轻轻戳开，它们会在原地变成温和词卡。</p>
+        </div>
+
+        <div class="panel panel-wash" data-panel="recompose">
+          <h3>第三步：重新摆一摆</h3>
+          <p>拖动或点击词卡，把今天整理成一句可以带走的话。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="scene scene-receipt" data-scene="receipt">
+      <div class="receipt-art">
+        <img id="receiptBg" src="../f88d65fcc0124dd20035a0e1bff06999.png" alt="小票页背景">
+        <div class="receipt-copy">
+          <h2 id="receiptTitle">今日洗护完成</h2>
+          <p id="receiptResult">今天辛苦了，你已经把这件心事认真洗过一遍。</p>
+          <div class="receipt-meta">
+            <span id="receiptEmotion">普通心事</span>
+            <span id="receiptCloth">普通心事 T 恤</span>
+            <span id="cleanIndex">67%</span>
+          </div>
+          <p id="receiptSource" class="receipt-source"></p>
+        </div>
+        <button class="receipt-save" id="saveReceiptBtn" aria-label="保存小票">保存小票</button>
+        <button class="receipt-restart" id="restartBtn" aria-label="再洗一件">再洗一件</button>
+        <div class="receipt-toast" id="receiptToast">已保存。手机浏览器如未自动下载，可以长按小票截图保存。</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

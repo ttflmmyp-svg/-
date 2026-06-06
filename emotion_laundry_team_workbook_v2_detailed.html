@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>《把今天洗一下》超详细三人分工执行手册 V2</title>
+  <style>
+    :root{
+      --bg:#f6fbff;
+      --card:#fff;
+      --ink:#172033;
+      --muted:#64748b;
+      --line:#dbeafe;
+      --blue:#2563eb;
+      --blue2:#1d4ed8;
+      --a:#7c3aed;
+      --b:#0891b2;
+      --c:#f97316;
+      --green:#10b981;
+      --red:#ef4444;
+      --yellow:#f59e0b;
+      --soft-blue:#eff6ff;
+      --soft-purple:#f5f3ff;
+      --soft-cyan:#ecfeff;
+      --soft-orange:#fff7ed;
+      --soft-green:#ecfdf5;
+      --soft-red:#fef2f2;
+      --soft-yellow:#fefce8;
+      --shadow:0 14px 35px rgba(37,99,235,.09);
+      --radius:20px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 8% 5%,#dbeafe 0,transparent 26%),
+        radial-gradient(circle at 90% 7%,#fed7aa 0,transparent 23%),
+        radial-gradient(circle at 25% 100%,#ddd6fe 0,transparent 24%),
+        linear-gradient(180deg,#fff 0%,var(--bg) 100%);
+      line-height:1.75;
+    }
+    .page{max-width:1280px;margin:0 auto;padding:28px 18px 72px}
+    .hero{
+      position:relative;overflow:hidden;border:1px solid var(--line);border-radius:30px;
+      background:linear-gradient(135deg,#eff6ff 0%,#fff 56%,#fff7ed 100%);
+      padding:38px;box-shadow:var(--shadow);
+    }
+    .hero:after{content:"🧺";position:absolute;right:36px;top:25px;font-size:82px;opacity:.26;transform:rotate(9deg)}
+    .badge{display:inline-flex;gap:8px;align-items:center;padding:7px 14px;border-radius:999px;border:1px solid #bfdbfe;background:#ffffffcc;color:var(--blue2);font-weight:900;font-size:14px;margin-bottom:16px}
+    h1{font-size:clamp(32px,5vw,58px);line-height:1.08;letter-spacing:-.04em;margin:0}
+    h2{font-size:28px;line-height:1.25;margin:0;letter-spacing:-.02em}
+    h3{font-size:20px;margin:0 0 10px}
+    h4{font-size:16px;margin:18px 0 8px;color:#0f172a}
+    p{margin:8px 0}
+    ul,ol{margin:8px 0 0;padding-left:20px;color:#475569}
+    li{margin:6px 0}
+    code{background:#f1f5f9;color:#0f172a;padding:2px 6px;border-radius:6px;font-size:.92em}
+    .subtitle{max-width:900px;color:#475569;font-size:18px;margin:16px 0 0}
+    .core-rule{margin-top:22px;padding:16px 18px;background:#fff;border:1px dashed #93c5fd;border-radius:18px;color:#1e3a8a;font-weight:900;font-size:17px}
+    .top-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}
+    .mini-card{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px}
+    .mini-card strong{display:block;color:#0f172a;margin-bottom:4px}
+    .mini-card span{color:var(--muted);font-size:14px}
+    .tabs{position:sticky;top:0;z-index:10;display:flex;flex-wrap:wrap;gap:8px;margin:22px 0;padding:12px;background:rgba(246,251,255,.9);backdrop-filter:blur(12px);border:1px solid #dbeafe;border-radius:20px;box-shadow:0 8px 20px rgba(15,23,42,.04)}
+    .tab-btn,.print-btn{border:1px solid #dbeafe;border-radius:999px;background:#fff;color:#334155;font-weight:900;padding:10px 14px;cursor:pointer;transition:.16s ease;font-size:14px}
+    .tab-btn:hover,.print-btn:hover{transform:translateY(-1px);border-color:#93c5fd}
+    .tab-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 8px 18px rgba(37,99,235,.2)}
+    .print-btn{margin-left:auto;color:var(--blue2)}
+    .panel{display:none;animation:fade .18s ease}.panel.active{display:block}
+    @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+    section{margin-top:28px}
+    .section-title{display:flex;align-items:center;gap:12px;margin:0 0 16px}
+    .section-title .icon{width:38px;height:38px;display:grid;place-items:center;border-radius:13px;background:var(--blue);color:#fff;font-weight:950}
+    .card{background:var(--card);border:1px solid #e5e7eb;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .four-col{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .notice{border-left:7px solid var(--blue);background:var(--soft-blue);border-radius:16px;padding:16px 18px;color:#1e3a8a;font-weight:800}
+    .danger{border-left:7px solid var(--red);background:var(--soft-red);border-radius:16px;padding:16px 18px;color:#991b1b;font-weight:800}
+    .success{border-left:7px solid var(--green);background:var(--soft-green);border-radius:16px;padding:16px 18px;color:#065f46;font-weight:800}
+    .warn{border-left:7px solid var(--yellow);background:var(--soft-yellow);border-radius:16px;padding:16px 18px;color:#92400e;font-weight:800}
+    .role-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:13px;font-weight:950;color:#fff}
+    .a-theme .role-tag,.owner.a{background:var(--a)}
+    .b-theme .role-tag,.owner.b{background:var(--b)}
+    .c-theme .role-tag,.owner.c{background:var(--c)}
+    .owner.all{background:var(--blue)}
+    .person-head{display:grid;grid-template-columns:78px 1fr;gap:18px;align-items:center;margin-bottom:16px}
+    .avatar{width:78px;height:78px;border-radius:24px;display:grid;place-items:center;font-size:40px;background:#eff6ff}
+    .a-theme .avatar{background:var(--soft-purple)}
+    .b-theme .avatar{background:var(--soft-cyan)}
+    .c-theme .avatar{background:var(--soft-orange)}
+    .owner{display:inline-block;min-width:34px;text-align:center;border-radius:999px;color:#fff;font-weight:950;font-size:12px;padding:3px 9px}
+    .task-block{border:1px solid #e5e7eb;border-radius:18px;padding:18px;background:#fff;margin-bottom:14px}
+    .task-block .label{display:inline-block;font-size:12px;font-weight:950;padding:4px 9px;border-radius:999px;margin-bottom:8px;background:#f1f5f9;color:#334155}
+    .a-theme .task-block.important{border-left:7px solid var(--a)}
+    .b-theme .task-block.important{border-left:7px solid var(--b)}
+    .c-theme .task-block.important{border-left:7px solid var(--c)}
+    .checklist{display:grid;gap:8px;margin-top:10px}
+    .check{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid #e2e8f0;border-radius:13px;background:#f8fafc}
+    .check input{width:18px;height:18px;margin-top:4px;cursor:pointer;flex:0 0 auto}
+    .check label{cursor:pointer;color:#334155;flex:1}
+    .check input:checked + label{color:#94a3b8;text-decoration:line-through}
+    table{width:100%;border-collapse:collapse;background:#fff;border-radius:16px;overflow:hidden;font-size:15px}
+    th,td{padding:14px 16px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top}
+    th{background:#2563eb;color:#fff;white-space:nowrap}
+    tr:nth-child(even) td{background:#f8fafc}
+    tr:last-child td{border-bottom:none}
+    .flow-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;counter-reset:f}
+    .flow-step{min-height:198px;border:1px solid #e5e7eb;border-radius:18px;background:#fff;padding:16px;box-shadow:var(--shadow);position:relative}
+    .flow-step:before{counter-increment:f;content:counter(f);width:30px;height:30px;display:grid;place-items:center;border-radius:11px;background:#dbeafe;color:#1d4ed8;font-weight:950;margin-bottom:9px}
+    .flow-step .emoji{font-size:30px;margin-bottom:4px}
+    .flow-step strong{display:block;font-size:16px;color:#0f172a;margin-bottom:6px}
+    .flow-step p{color:var(--muted);font-size:14px;margin:0}
+    .phase{display:grid;grid-template-columns:148px 1fr;gap:18px;padding:18px;border:1px solid #e5e7eb;background:#fff;border-radius:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+    .phase-time{font-weight:950;color:var(--blue2)}
+    .matrix{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .vs{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .vs-card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:18px}
+    .vs-card.a{border-top:8px solid var(--a)}
+    .vs-card.b{border-top:8px solid var(--b)}
+    .page-card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+    .page-card h3{display:flex;align-items:center;gap:8px}
+    .todo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+    .todo{border:1px solid #e5e7eb;border-radius:14px;padding:14px;background:#f8fafc}
+    .todo h4{margin:0 0 8px}.todo.a h4{color:var(--a)}.todo.b h4{color:var(--b)}.todo.c h4{color:var(--c)}
+    .handoff{display:grid;grid-template-columns:1fr 46px 1fr;gap:12px;align-items:stretch;margin:14px 0}
+    .handoff-box{padding:16px;border-radius:18px;border:1px solid #e5e7eb;background:#fff}
+    .arrow{display:grid;place-items:center;font-size:26px;color:var(--blue);font-weight:950}
+    .pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid #e2e8f0;border-radius:999px;padding:7px 11px;font-size:13px;font-weight:850;color:#334155;background:#fff}
+    .template{background:#0f172a;color:#e2e8f0;border-radius:18px;padding:18px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:14px;white-space:pre-wrap;overflow:auto}
+    .template b{color:#93c5fd}
+    .small{font-size:13px;color:var(--muted)}
+    .footer{text-align:center;color:#64748b;margin-top:36px;font-size:13px}
+    .decision{display:grid;grid-template-columns:170px 1fr;gap:12px;border:1px solid #e5e7eb;background:#fff;border-radius:16px;padding:14px;margin-bottom:10px}
+    .decision strong{color:#0f172a}
+    @media(max-width:1100px){
+      .flow-grid{grid-template-columns:repeat(3,1fr)}
+      .top-grid,.four-col{grid-template-columns:repeat(2,1fr)}
+      .three-col,.todo-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:820px){
+      .hero{padding:28px 20px}.hero:after{display:none}
+      .two-col,.phase,.handoff,.matrix,.vs,.decision{grid-template-columns:1fr}
+      .arrow{transform:rotate(90deg)}
+      .flow-grid,.top-grid,.four-col{grid-template-columns:1fr}
+      .person-head{grid-template-columns:1fr}
+      th,td{display:block;width:100%}
+      th{border-bottom:1px solid rgba(255,255,255,.4)}
+      .tabs{position:static}
+      .print-btn{margin-left:0}
+    }
+    @media print{
+      body{background:#fff}.page{max-width:none;padding:0}.tabs,.print-btn{display:none}
+      .panel{display:block!important;page-break-after:always}
+      .card,.flow-step,.phase,.task-block,.hero,.page-card{box-shadow:none}
+    }
+  </style>
+</head>
+
+<body>
+<main class="page">
+  <header class="hero">
+    <div class="badge">🧼 V2 超详细版 · 任务拆到动作级</div>
+    <h1>《把今天洗一下》三人分工执行手册</h1>
+    <p class="subtitle">
+      这版按“完全不知道从哪下手也能照着做”的标准写。重点补清楚：A 和 B 到底怎么区分、每个页面谁写什么、谁做什么、谁交给谁、什么时候合并、时间不够怎么降级。
+    </p>
+    <div class="core-rule">
+      最核心的一句话：A 写清楚“页面规则和内容说明”，B 把规则变成“能点能跑的网页”，C 负责“素材、台词、小票和展示包装”。三个人不是互相等，而是并行交付。
+    </div>
+    <div class="top-grid">
+      <div class="mini-card"><strong>A 产出的是文档</strong><span>流程表、按钮表、规则表、讲解稿</span></div>
+      <div class="mini-card"><strong>B 产出的是 Demo</strong><span>HTML/CSS/JS、交互、小票、本地运行</span></div>
+      <div class="mini-card"><strong>C 产出的是素材</strong><span>NPC、衣服、文案、海报、截图</span></div>
+      <div class="mini-card"><strong>合并节奏</strong><span>45 分钟统一；2 小时粗 Demo；之后每 1-2 小时合并</span></div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="overview">总览</button>
+    <button class="tab-btn" data-tab="ab">A/B 区分</button>
+    <button class="tab-btn" data-tab="pages">按页面拆任务</button>
+    <button class="tab-btn" data-tab="a">A 超详细任务</button>
+    <button class="tab-btn" data-tab="b">B 超详细任务</button>
+    <button class="tab-btn" data-tab="c">C 超详细任务</button>
+    <button class="tab-btn" data-tab="timeline">时间线</button>
+    <button class="tab-btn" data-tab="handoff">交接与防重叠</button>
+    <button class="tab-btn" data-tab="final">最终检查</button>
+    <button class="print-btn" onclick="window.print()">打印 / 导出 PDF</button>
+  </nav>
+
+  <section id="overview" class="panel active">
+    <div class="section-title"><span class="icon">0</span><h2>先看这个：三个人到底怎么一起做</h2></div>
+    <div class="two-col">
+      <div class="card">
+        <h3>不要理解成“岗位”</h3>
+        <p>不要说“我是产品，你是前端，她是美术”就结束了。这样太虚，现场会混乱。</p>
+        <div class="notice">
+          正确理解：每个人负责一类“交付物”。A 交文档规则，B 交可玩的网页，C 交素材文案和展示物料。
+        </div>
+      </div>
+      <div class="card">
+        <h3>三个人可以同时做吗？</h3>
+        <p><b>可以，但必须先一起定 30-45 分钟。</b>如果不先统一，A 写的流程、B 做的页面、C 画的素材会对不上。</p>
+        <div class="success">
+          统一后并行：A 写规则，B 搭页面，C 做素材。B 不等 C；C 不乱改代码；A 不临时加大需求。
+        </div>
+      </div>
+    </div>
+
+    <section>
+      <div class="section-title"><span class="icon">🎮</span><h2>作品主线固定成这一条</h2></div>
+      <div class="flow-grid">
+        <div class="flow-step"><div class="emoji">🚪</div><strong>首页</strong><p>进入情绪洗衣房，看到 NPC、洗衣机、开始按钮。</p></div>
+        <div class="flow-step"><div class="emoji">✍️</div><strong>输入心事</strong><p>玩家写一句现在的烦恼或坏情绪。</p></div>
+        <div class="flow-step"><div class="emoji">👕</div><strong>生成脏衣服</strong><p>根据关键词判断情绪，显示对应衣服。</p></div>
+        <div class="flow-step"><div class="emoji">🫧</div><strong>选择模式</strong><p>强力去污、轻柔手洗、快速脱水、晾一晾。</p></div>
+        <div class="flow-step"><div class="emoji">🌀</div><strong>点击泡泡</strong><p>点掉坏想法泡泡，完成清洗。</p></div>
+        <div class="flow-step"><div class="emoji">🧾</div><strong>生成小票</strong><p>获得一张温柔的情绪小票，可以截图或收藏。</p></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">✅</span><h2>第一件事：三个人一起开 45 分钟会</h2></div>
+      <div class="card">
+        <div class="checklist">
+          <div class="check"><input id="ov1" type="checkbox"><label for="ov1">确定游戏名：《把今天洗一下》。</label></div>
+          <div class="check"><input id="ov2" type="checkbox"><label for="ov2">确定一句话：玩家写下心事，把它变成脏衣服，投入洗衣机，选择模式，点掉泡泡，获得情绪小票。</label></div>
+          <div class="check"><input id="ov3" type="checkbox"><label for="ov3">确定必做 6 页：首页、输入页、投衣页、模式页、清洗页、小票页。</label></div>
+          <div class="check"><input id="ov4" type="checkbox"><label for="ov4">确定可选第 7 页：我的小票 / 衣柜页，时间不够就砍。</label></div>
+          <div class="check"><input id="ov5" type="checkbox"><label for="ov5">确定情绪类型：焦虑、愤怒、难过、疲惫、迷茫、默认心事。</label></div>
+          <div class="check"><input id="ov6" type="checkbox"><label for="ov6">确定洗涤模式：强力去污、轻柔手洗、快速脱水、晾一晾。</label></div>
+          <div class="check"><input id="ov7" type="checkbox"><label for="ov7">确定 B 先用临时素材写，C 后面替换正式素材。</label></div>
+          <div class="check"><input id="ov8" type="checkbox"><label for="ov8">确定最后 30 分钟不加新功能，只修 bug 和错字。</label></div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section id="ab" class="panel">
+    <div class="section-title"><span class="icon">AB</span><h2>A 和 B 到底怎么区分</h2></div>
+
+    <div class="vs">
+      <div class="vs-card a">
+        <h3><span class="owner a">A</span> A 是“说明书作者”</h3>
+        <p>A 的工作不是“想点子”这么空。A 要写出 B 能照着做的说明书。</p>
+        <h4>A 要回答的问题</h4>
+        <ul>
+          <li>这个页面叫什么？</li>
+          <li>用户看到哪几句话？</li>
+          <li>有哪些按钮？</li>
+          <li>每个按钮点完去哪？</li>
+          <li>输入为空怎么办？</li>
+          <li>用户输入“焦虑”时归到哪一类？</li>
+          <li>小票上要显示哪些字段？</li>
+          <li>现场要怎么讲给评委听？</li>
+        </ul>
+      </div>
+      <div class="vs-card b">
+        <h3><span class="owner b">B</span> B 是“施工队队长”</h3>
+        <p>B 不负责重新定义玩法。B 负责把 A 写的说明书变成网页。</p>
+        <h4>B 要回答的问题</h4>
+        <ul>
+          <li>怎么让页面切换？</li>
+          <li>怎么保存用户输入？</li>
+          <li>怎么根据关键词判断情绪？</li>
+          <li>怎么点击衣服进入下一步？</li>
+          <li>怎么生成泡泡并点击消失？</li>
+          <li>怎么把 C 的文案放进小票？</li>
+          <li>怎么保证手机能点？</li>
+          <li>怎么保证离线打开？</li>
+        </ul>
+      </div>
+    </div>
+
+    <section>
+      <div class="section-title"><span class="icon">🧠</span><h2>最简单判断：这件事该问 A 还是 B？</h2></div>
+      <div class="card">
+        <table>
+          <thead><tr><th>问题</th><th>找谁</th><th>原因</th></tr></thead>
+          <tbody>
+            <tr><td>“按钮文字叫什么？”</td><td><span class="owner a">A</span></td><td>这是内容和流程规则。</td></tr>
+            <tr><td>“点按钮后怎么跳页面？”</td><td><span class="owner a">A</span> 决定去哪；<span class="owner b">B</span> 实现跳转</td><td>A 决定逻辑，B 写代码。</td></tr>
+            <tr><td>“焦虑对应什么衣服？”</td><td><span class="owner a">A</span> 决定；<span class="owner c">C</span> 画图；<span class="owner b">B</span> 接入</td><td>规则、素材、实现是三件事。</td></tr>
+            <tr><td>“拖拽会不会太难？”</td><td><span class="owner b">B</span></td><td>B 判断技术风险。如果难，就改成点击投入。</td></tr>
+            <tr><td>“小票文案怎么写更温柔？”</td><td><span class="owner c">C</span></td><td>这是情绪文案，不是代码。</td></tr>
+            <tr><td>“海报写哪些功能？”</td><td><span class="owner c">C</span> 写；<span class="owner b">B</span> 确认功能真的有</td><td>不能把没做出来的功能写上海报。</td></tr>
+            <tr><td>“现场怎么解释这个作品？”</td><td><span class="owner a">A</span></td><td>A 负责整体逻辑和表达。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">📄</span><h2>A 给 B 的文档必须长这样</h2></div>
+      <div class="two-col">
+        <div class="card">
+          <h3>A 不要这样写</h3>
+          <div class="danger">
+            “做一个输入情绪然后洗衣服的页面，要有互动，最后出小票。”
+          </div>
+          <p>这句话 B 看了还是不知道怎么写，因为没有按钮、状态、规则、异常情况。</p>
+        </div>
+        <div class="card">
+          <h3>A 要这样写</h3>
+          <div class="template">页面：输入情绪页
+
+用户看到：
+- 标题：今天有什么想法需要洗一洗？
+- 输入框提示：写一句就好，比如“我今天有点焦虑”
+- 按钮：确认投递
+
+规则：
+- 如果输入为空，显示提示：洗衣机还没收到衣服哦
+- 如果输入不为空，保存 userText
+- 调用情绪判断规则，得到 emotionType
+- 进入投衣页
+
+交给 B：
+- 页面标题
+- 输入框提示
+- 按钮文字
+- 空输入提示
+- 下一页名称：throw</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">🔧</span><h2>B 接到 A 的文档后要做什么</h2></div>
+      <div class="card">
+        <ol>
+          <li><b>先搭空页面：</b>把页面分成 home、input、throw、mode、washing、receipt。</li>
+          <li><b>先写跳转：</b>按钮能从第 1 页跳到第 6 页，哪怕页面很丑。</li>
+          <li><b>再写数据：</b>用户输入保存到变量里，模式也保存到变量里。</li>
+          <li><b>再写判断：</b>根据 A 的关键词表判断情绪。</li>
+          <li><b>再写互动：</b>点击衣服、点击泡泡、小票生成。</li>
+          <li><b>最后换素材：</b>把 C 给的图片和文案替换进去。</li>
+        </ol>
+      </div>
+    </section>
+  </section>
+
+  <section id="pages" class="panel">
+    <div class="section-title"><span class="icon">P</span><h2>按页面拆：每一页三个人具体干什么</h2></div>
+
+    <div class="page-card">
+      <h3>🚪 页面 1：首页</h3>
+      <p><b>目的：</b>让玩家 3 秒内知道这是一个“情绪洗衣房”，并点击开始。</p>
+      <div class="todo-grid">
+        <div class="todo a">
+          <h4>A 要写</h4>
+          <ul>
+            <li>页面标题：欢迎来到情绪洗衣房。</li>
+            <li>副标题：今天有什么想法需要洗一洗？</li>
+            <li>按钮文字：开始洗衣。</li>
+            <li>可选按钮：查看我的小票。</li>
+            <li>点击规则：开始洗衣 → 输入页。</li>
+          </ul>
+        </div>
+        <div class="todo b">
+          <h4>B 要做</h4>
+          <ul>
+            <li>做首页容器。</li>
+            <li>放洗衣机位置。</li>
+            <li>放 NPC 位置。</li>
+            <li>按钮能点击进入输入页。</li>
+            <li>手机端居中显示。</li>
+          </ul>
+        </div>
+        <div class="todo c">
+          <h4>C 要给</h4>
+          <ul>
+            <li>洗衣机图。</li>
+            <li>NPC 基础图。</li>
+            <li>首页背景建议。</li>
+            <li>首页 NPC 台词 2-3 条。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <h3>✍️ 页面 2：输入情绪页</h3>
+      <p><b>目的：</b>让玩家写一句心事，不要让玩家觉得像填问卷。</p>
+      <div class="todo-grid">
+        <div class="todo a">
+          <h4>A 要写</h4>
+          <ul>
+            <li>标题：今天有什么想法需要洗一洗？</li>
+            <li>输入框提示：写一句就好，比如“我今天有点焦虑”。</li>
+            <li>按钮：确认投递。</li>
+            <li>空输入提示：洗衣机还没收到衣服哦。</li>
+            <li>规则：输入不为空 → 保存文字 → 判断情绪 → 投衣页。</li>
+          </ul>
+        </div>
+        <div class="todo b">
+          <h4>B 要做</h4>
+          <ul>
+            <li>做 textarea 或 input。</li>
+            <li>点击确认时读取内容。</li>
+            <li>如果为空，显示提示，不跳页。</li>
+            <li>如果不为空，保存到 <code>userText</code>。</li>
+            <li>调用情绪判断函数。</li>
+            <li>跳到投衣页。</li>
+          </ul>
+        </div>
+        <div class="todo c">
+          <h4>C 要给</h4>
+          <ul>
+            <li>输入页 NPC 台词 2-3 条。</li>
+            <li>输入框附近的小装饰，比如纸条、衣篮。</li>
+            <li>文案风格建议：温柔，不审判。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <h3>👕 页面 3：投衣页</h3>
+      <p><b>目的：</b>把抽象情绪变成可操作的“脏衣服”。</p>
+      <div class="todo-grid">
+        <div class="todo a">
+          <h4>A 要写</h4>
+          <ul>
+            <li>情绪判断表：关键词 → 情绪类型。</li>
+            <li>情绪 → 衣服名称：焦虑衬衫、愤怒袜子等。</li>
+            <li>页面提示：这件心事已经变成一件衣服。</li>
+            <li>按钮/交互说明：点击衣服投入洗衣机。</li>
+            <li>下一步：投入成功 → 模式页。</li>
+          </ul>
+        </div>
+        <div class="todo b">
+          <h4>B 要做</h4>
+          <ul>
+            <li>根据 <code>emotionType</code> 显示对应衣服。</li>
+            <li>点击衣服后播放简单动画。</li>
+            <li>动画结束进入模式页。</li>
+            <li>先做点击，不要先做拖拽。</li>
+            <li>如果素材没来，用 emoji/色块代替。</li>
+          </ul>
+        </div>
+        <div class="todo c">
+          <h4>C 要给</h4>
+          <ul>
+            <li>焦虑衣服、愤怒衣服、难过衣服、疲惫衣服、迷茫衣服。</li>
+            <li>如果来不及，给一件衣服，用颜色区分。</li>
+            <li>投衣页 NPC 台词 2-3 条。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <h3>🫧 页面 4：选择洗涤模式页</h3>
+      <p><b>目的：</b>让玩家觉得自己在参与情绪处理，而不是等系统给答案。</p>
+      <div class="todo-grid">
+        <div class="todo a">
+          <h4>A 要写</h4>
+          <ul>
+            <li>4 个模式名称。</li>
+            <li>每个模式一句解释。</li>
+            <li>每个模式适合什么情绪。</li>
+            <li>点击规则：选中模式 → 保存模式 → 清洗页。</li>
+          </ul>
+        </div>
+        <div class="todo b">
+          <h4>B 要做</h4>
+          <ul>
+            <li>做 4 张模式卡片。</li>
+            <li>点击卡片后高亮。</li>
+            <li>保存 <code>washMode</code>。</li>
+            <li>跳到清洗页。</li>
+          </ul>
+        </div>
+        <div class="todo c">
+          <h4>C 要给</h4>
+          <ul>
+            <li>模式图标：强力、轻柔、脱水、晾晒。</li>
+            <li>模式页 NPC 台词。</li>
+            <li>卡片风格建议。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <h3>🌀 页面 5：清洗小游戏页</h3>
+      <p><b>目的：</b>让作品真的“可玩”。点击泡泡是最稳的互动。</p>
+      <div class="todo-grid">
+        <div class="todo a">
+          <h4>A 要写</h4>
+          <ul>
+            <li>泡泡文字库：我不够好、来不及了、别人会失望等。</li>
+            <li>清洗页提示：点掉这些不一定是真的想法。</li>
+            <li>完成规则：泡泡全点完 → 小票页。</li>
+            <li>不要设计太复杂的小游戏规则。</li>
+          </ul>
+        </div>
+        <div class="todo b">
+          <h4>B 要做</h4>
+          <ul>
+            <li>生成 5-8 个泡泡。</li>
+            <li>泡泡随机显示文案。</li>
+            <li>点击泡泡后消失。</li>
+            <li>进度条增加。</li>
+            <li>全消失后显示清洗完成，再跳小票页。</li>
+          </ul>
+        </div>
+        <div class="todo c">
+          <h4>C 要给</h4>
+          <ul>
+            <li>泡泡样式或图片。</li>
+            <li>洗衣机转动视觉建议。</li>
+            <li>清洗页 NPC 台词。</li>
+            <li>可选音效。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <h3>🧾 页面 6：情绪小票页</h3>
+      <p><b>目的：</b>这是高光页面，评委最容易记住，也最适合截图。</p>
+      <div class="todo-grid">
+        <div class="todo a">
+          <h4>A 要写</h4>
+          <ul>
+            <li>小票字段：衣物类型、污渍来源、洗涤模式、处理结果、护理建议、洗净指数。</li>
+            <li>按钮：再洗一件、收藏小票、返回首页。</li>
+            <li>规则：再洗一件 → 输入页；收藏 → 保存；返回 → 首页。</li>
+          </ul>
+        </div>
+        <div class="todo b">
+          <h4>B 要做</h4>
+          <ul>
+            <li>把当前数据填进小票模板。</li>
+            <li>从 C 的文案库抽一条处理结果。</li>
+            <li>生成洗净指数。</li>
+            <li>实现再洗一件。</li>
+            <li>可选实现 localStorage 收藏。</li>
+          </ul>
+        </div>
+        <div class="todo c">
+          <h4>C 要给</h4>
+          <ul>
+            <li>小票视觉样式。</li>
+            <li>每类情绪至少 3 条结果文案。</li>
+            <li>每类情绪至少 3 条护理建议。</li>
+            <li>小票页 NPC 台词。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="a" class="panel a-theme">
+    <div class="section-title"><span class="icon">A</span><h2>A 超详细任务：你不是“想点子”，你是“写说明书”</h2></div>
+
+    <div class="card">
+      <div class="person-head">
+        <div class="avatar">🧭</div>
+        <div>
+          <h3>A 的最终目标</h3>
+          <p><b>让 B 不用猜，照着你的文档就能写；让 C 知道需要什么文案；让评委听完能懂。</b></p>
+          <span class="role-tag">A 的交付物 = 流程表 + 规则表 + 讲解稿 + 项目介绍</span>
+        </div>
+      </div>
+    </div>
+
+    <section>
+      <div class="section-title"><span class="icon">1</span><h2>A 第 1 件事：写“页面说明卡”</h2></div>
+      <div class="card">
+        <p>A 要为每个页面写一张说明卡。不要只写概念，要写到 B 能照着做。</p>
+        <div class="template">页面名称：
+这个页面的目的：
+用户看到的标题：
+用户看到的说明文字：
+用户能点的按钮：
+每个按钮点击后发生什么：
+如果用户乱操作怎么办：
+需要 C 提供什么素材/文案：
+交给 B 的变量/规则：</div>
+        <div class="checklist">
+          <div class="check"><input id="a101" type="checkbox"><label for="a101">为首页写一张页面说明卡。</label></div>
+          <div class="check"><input id="a102" type="checkbox"><label for="a102">为输入页写一张页面说明卡。</label></div>
+          <div class="check"><input id="a103" type="checkbox"><label for="a103">为投衣页写一张页面说明卡。</label></div>
+          <div class="check"><input id="a104" type="checkbox"><label for="a104">为模式页写一张页面说明卡。</label></div>
+          <div class="check"><input id="a105" type="checkbox"><label for="a105">为清洗页写一张页面说明卡。</label></div>
+          <div class="check"><input id="a106" type="checkbox"><label for="a106">为小票页写一张页面说明卡。</label></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">2</span><h2>A 第 2 件事：写“按钮逻辑表”</h2></div>
+      <div class="card">
+        <p>按钮逻辑表就是告诉 B：哪个按钮在哪个页面，点了去哪，要不要保存数据。</p>
+        <table>
+          <thead><tr><th>当前页面</th><th>按钮/动作</th><th>点击前检查</th><th>保存什么</th><th>下一页</th></tr></thead>
+          <tbody>
+            <tr><td>首页</td><td>开始洗衣</td><td>不检查</td><td>无</td><td>输入页</td></tr>
+            <tr><td>输入页</td><td>确认投递</td><td>输入不能为空</td><td>userText、emotionType、clothType</td><td>投衣页</td></tr>
+            <tr><td>投衣页</td><td>点击衣服</td><td>已存在 clothType</td><td>无</td><td>模式页</td></tr>
+            <tr><td>模式页</td><td>点击模式卡片</td><td>不检查</td><td>washMode</td><td>清洗页</td></tr>
+            <tr><td>清洗页</td><td>点击泡泡</td><td>泡泡未被点过</td><td>progress</td><td>泡泡全消失后进入小票页</td></tr>
+            <tr><td>小票页</td><td>再洗一件</td><td>不检查</td><td>清空当前流程数据</td><td>输入页</td></tr>
+            <tr><td>小票页</td><td>收藏小票</td><td>小票已生成</td><td>receiptList</td><td>停留当前页或进入衣柜页</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">3</span><h2>A 第 3 件事：写“情绪判断规则”</h2></div>
+      <div class="card">
+        <p>规则越简单越好。不要追求智能，追求稳定。</p>
+        <table>
+          <thead><tr><th>优先级</th><th>情绪类型</th><th>关键词</th><th>衣服名称</th><th>给 C 的视觉提示</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>焦虑</td><td>焦虑、紧张、担心、来不及、害怕、慌</td><td>焦虑衬衫</td><td>皱巴巴、轻微抖动、蓝色线条</td></tr>
+            <tr><td>2</td><td>愤怒</td><td>生气、烦、讨厌、火大、不公平、气死</td><td>愤怒袜子</td><td>红色污渍、冒烟、尖角</td></tr>
+            <tr><td>3</td><td>难过</td><td>难过、委屈、想哭、失落、孤单、没人懂</td><td>难过毛衣</td><td>湿漉漉、水滴、低垂</td></tr>
+            <tr><td>4</td><td>疲惫</td><td>累、困、麻木、不想动、撑不住、没力气</td><td>疲惫外套</td><td>厚重、下垂、颜色偏灰</td></tr>
+            <tr><td>5</td><td>迷茫</td><td>不知道、迷茫、空、没方向、混乱、纠结</td><td>迷茫围巾</td><td>打结、半透明、问号</td></tr>
+            <tr><td>默认</td><td>普通心事</td><td>没有命中</td><td>普通心事 T 恤</td><td>普通衣服，轻微污渍</td></tr>
+          </tbody>
+        </table>
+        <div class="warn">注意：如果一句话同时命中多个情绪，按上面优先级取第一个。这个规则要写给 B，否则 B 会不知道怎么判断。</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">4</span><h2>A 第 4 件事：写“洗涤模式说明”</h2></div>
+      <div class="card">
+        <table>
+          <thead><tr><th>模式</th><th>一句话说明</th><th>适合情绪</th><th>小票语气</th></tr></thead>
+          <tbody>
+            <tr><td>强力去污</td><td>适合那些堵在胸口、需要被用力甩出去的情绪。</td><td>愤怒、烦躁</td><td>直接、有力量、保留边界</td></tr>
+            <tr><td>轻柔手洗</td><td>适合那些不能被硬拧，只能慢慢揉开的委屈。</td><td>难过、委屈</td><td>温柔、陪伴、不催促</td></tr>
+            <tr><td>快速脱水</td><td>适合那些在脑子里转太久，需要先停下来的焦虑。</td><td>焦虑、紧张</td><td>清晰、行动导向</td></tr>
+            <tr><td>晾一晾</td><td>适合暂时想不清楚、需要一点空气的心事。</td><td>迷茫、疲惫</td><td>留白、慢下来、允许休息</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">5</span><h2>A 第 5 件事：准备讲解和文档</h2></div>
+      <div class="two-col">
+        <div class="card">
+          <h3>项目介绍文档大纲</h3>
+          <div class="checklist">
+            <div class="check"><input id="a501" type="checkbox"><label for="a501">作品名：《把今天洗一下》。</label></div>
+            <div class="check"><input id="a502" type="checkbox"><label for="a502">一句话介绍。</label></div>
+            <div class="check"><input id="a503" type="checkbox"><label for="a503">用户痛点：年轻人常有说不清的压力，需要轻量表达和处理。</label></div>
+            <div class="check"><input id="a504" type="checkbox"><label for="a504">解决方案：把情绪变成脏衣服，用洗衣流程完成情绪仪式。</label></div>
+            <div class="check"><input id="a505" type="checkbox"><label for="a505">玩法流程：输入、投衣、选模式、清洗、小票。</label></div>
+            <div class="check"><input id="a506" type="checkbox"><label for="a506">创新点：情绪具象化、洗衣仪式、小票反馈。</label></div>
+            <div class="check"><input id="a507" type="checkbox"><label for="a507">技术实现：纯离线 H5，本地关键词和文案库。</label></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>现场讲解稿</h3>
+          <div class="template">30 秒版：
+
+我们做的是《把今天洗一下》，一个情绪洗衣房小游戏。玩家把当前的负面想法写下来，系统会把它变成一件脏衣服。玩家选择洗涤模式，通过点击泡泡完成清洗，最后得到一张情绪小票。我们希望用一个轻松的洗衣仪式，让压力变成可以被看见、被处理、被收藏的东西。
+
+如果评委问“为什么是洗衣机”：
+
+因为洗衣是大家都熟悉的日常动作。我们把抽象情绪变成脏衣服，让用户不用直接面对“我很糟糕”，而是面对“一件可以被洗一洗的心事”。这样会更轻、更安全，也更适合做成可玩的互动体验。</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="notice">A 最重要的交付标准：B 看了你的表，不需要问“这个按钮点了去哪？”C 看了你的表，知道该写哪些台词和画哪些素材。</div>
+  </section>
+
+  <section id="b" class="panel b-theme">
+    <div class="section-title"><span class="icon">B</span><h2>B 超详细任务：你不是“等需求”，你是“先把它跑起来”</h2></div>
+    <div class="card">
+      <div class="person-head">
+        <div class="avatar">💻</div>
+        <div>
+          <h3>B 的最终目标</h3>
+          <p><b>做出一个能离线打开、能完整点完、不会现场崩的 H5 Demo。</b></p>
+          <span class="role-tag">B 的交付物 = index.html + style.css + script.js + assets + 可演示 Demo</span>
+        </div>
+      </div>
+    </div>
+
+    <section>
+      <div class="section-title"><span class="icon">1</span><h2>B 第 1 件事：建最简单项目</h2></div>
+      <div class="two-col">
+        <div class="card">
+          <h3>文件结构</h3>
+          <div class="template">emotion-laundry/
+├── index.html
+├── style.css
+├── script.js
+└── assets/
+    ├── washer.png
+    ├── npc.png
+    ├── clothes/
+    │   ├── cloth-anxiety.png
+    │   ├── cloth-anger.png
+    │   ├── cloth-sad.png
+    │   ├── cloth-tired.png
+    │   └── cloth-lost.png
+    └── sounds/</div>
+        </div>
+        <div class="card">
+          <h3>先用临时素材</h3>
+          <p>如果 C 还没给图，B 不许停工。先用 emoji 或 div 占位：</p>
+          <ul>
+            <li>洗衣机：先用 🧺 或一个圆角大框。</li>
+            <li>NPC：先用 🐑。</li>
+            <li>衣服：先用 👕。</li>
+            <li>泡泡：先用 CSS 圆形。</li>
+            <li>小票：先用白色卡片。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">2</span><h2>B 第 2 件事：先做页面切换，不要先做美化</h2></div>
+      <div class="card">
+        <p>第一版目标：哪怕丑，也要能从首页点到小票页。</p>
+        <div class="checklist">
+          <div class="check"><input id="b201" type="checkbox"><label for="b201">建立 6 个页面区域：home、input、throw、mode、washing、receipt。</label></div>
+          <div class="check"><input id="b202" type="checkbox"><label for="b202">默认只显示 home，其他隐藏。</label></div>
+          <div class="check"><input id="b203" type="checkbox"><label for="b203">写一个 <code>goTo(pageName)</code> 函数，负责隐藏旧页面、显示新页面。</label></div>
+          <div class="check"><input id="b204" type="checkbox"><label for="b204">首页“开始洗衣”按钮 → input。</label></div>
+          <div class="check"><input id="b205" type="checkbox"><label for="b205">输入页“确认投递”按钮 → throw。</label></div>
+          <div class="check"><input id="b206" type="checkbox"><label for="b206">投衣页点击衣服 → mode。</label></div>
+          <div class="check"><input id="b207" type="checkbox"><label for="b207">模式页点击模式 → washing。</label></div>
+          <div class="check"><input id="b208" type="checkbox"><label for="b208">清洗完成 → receipt。</label></div>
+          <div class="check"><input id="b209" type="checkbox"><label for="b209">小票页“再洗一件” → input。</label></div>
+        </div>
+        <div class="warn">判断第一阶段是否成功：把电脑递给别人，对方能点到小票页，即使页面很丑，也算成功。</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">3</span><h2>B 第 3 件事：保存游戏数据</h2></div>
+      <div class="card">
+        <p>B 要在 JS 里保存当前这一轮游戏的数据。不要每页都重新算，统一放一个对象里。</p>
+        <div class="template">gameState = {
+  userText: "",       // 玩家输入的心事
+  emotionType: "",    // 焦虑 / 愤怒 / 难过 / 疲惫 / 迷茫 / 默认
+  clothType: "",      // 焦虑衬衫 / 愤怒袜子等
+  washMode: "",       // 强力去污 / 轻柔手洗 / 快速脱水 / 晾一晾
+  bubblesLeft: 0,     // 剩余泡泡数量
+  receipt: null       // 最终小票数据
+}</div>
+        <ul>
+          <li>输入页保存 <code>userText</code>。</li>
+          <li>输入页提交时计算 <code>emotionType</code> 和 <code>clothType</code>。</li>
+          <li>模式页保存 <code>washMode</code>。</li>
+          <li>小票页生成 <code>receipt</code>。</li>
+          <li>再洗一件时清空这些数据。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">4</span><h2>B 第 4 件事：做关键词判断</h2></div>
+      <div class="card">
+        <p>直接照 A 的表写，不要自己发明新规则。</p>
+        <div class="template">判断逻辑：
+
+1. 读取 userText
+2. 按顺序检查关键词：
+   - 焦虑关键词
+   - 愤怒关键词
+   - 难过关键词
+   - 疲惫关键词
+   - 迷茫关键词
+3. 命中哪个，就返回哪个 emotionType
+4. 都没命中，就返回 default
+5. 根据 emotionType 设置 clothType</div>
+        <div class="checklist">
+          <div class="check"><input id="b401" type="checkbox"><label for="b401">把 A 的关键词表放进 JS。</label></div>
+          <div class="check"><input id="b402" type="checkbox"><label for="b402">写判断函数 <code>detectEmotion(text)</code>。</label></div>
+          <div class="check"><input id="b403" type="checkbox"><label for="b403">输入“我很焦虑”时能显示焦虑衣服。</label></div>
+          <div class="check"><input id="b404" type="checkbox"><label for="b404">输入“烦死了”时能显示愤怒衣服。</label></div>
+          <div class="check"><input id="b405" type="checkbox"><label for="b405">输入普通内容时显示普通心事 T 恤。</label></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">5</span><h2>B 第 5 件事：实现核心交互</h2></div>
+      <div class="two-col">
+        <div class="task-block important">
+          <span class="label">投衣交互</span>
+          <h3>点击衣服投入洗衣机</h3>
+          <ul>
+            <li>先不要做拖拽，拖拽容易在手机端出问题。</li>
+            <li>点击衣服后，给衣服加一个 CSS class，比如 <code>fly-in</code>。</li>
+            <li>动画 0.6 秒后跳到模式页。</li>
+            <li>如果动画来不及，点击后直接跳页也可以。</li>
+          </ul>
+        </div>
+        <div class="task-block important">
+          <span class="label">模式选择</span>
+          <h3>点击模式卡片</h3>
+          <ul>
+            <li>四张卡片：强力去污、轻柔手洗、快速脱水、晾一晾。</li>
+            <li>点击卡片时保存 <code>washMode</code>。</li>
+            <li>可以短暂高亮，然后进入清洗页。</li>
+            <li>不要让用户必须再点“下一步”，少一步更顺。</li>
+          </ul>
+        </div>
+        <div class="task-block important">
+          <span class="label">清洗小游戏</span>
+          <h3>点击泡泡</h3>
+          <ul>
+            <li>进入 washing 页面时生成 5 个泡泡。</li>
+            <li>每个泡泡有一句坏想法。</li>
+            <li>点击泡泡后泡泡消失。</li>
+            <li>泡泡全部消失后显示“清洗完成”。</li>
+            <li>1 秒后进入小票页。</li>
+          </ul>
+        </div>
+        <div class="task-block important">
+          <span class="label">小票生成</span>
+          <h3>把数据填入小票</h3>
+          <ul>
+            <li>衣物类型来自 <code>clothType</code>。</li>
+            <li>洗涤模式来自 <code>washMode</code>。</li>
+            <li>污渍来源可以显示用户原文，或截取前 20 字。</li>
+            <li>处理结果从 C 的文案库随机抽。</li>
+            <li>洗净指数随机 30-88，不要写 100。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">6</span><h2>B 第 6 件事：接入 C 的素材和文案</h2></div>
+      <div class="card">
+        <p>B 接入素材时要先确认文件名，不要让 C 发“最终版真的最终版2.png”。</p>
+        <table>
+          <thead><tr><th>C 给的东西</th><th>B 放在哪里</th><th>如果没有怎么办</th></tr></thead>
+          <tbody>
+            <tr><td>washer.png</td><td>首页、投衣页、清洗页</td><td>用 CSS 画洗衣机或 emoji</td></tr>
+            <tr><td>npc.png</td><td>每页左下/右下角</td><td>用 🐑 代替</td></tr>
+            <tr><td>cloth-anxiety.png 等</td><td>投衣页</td><td>用同一件衣服改颜色</td></tr>
+            <tr><td>NPC 台词</td><td>各页面气泡</td><td>先写固定一句</td></tr>
+            <tr><td>小票文案库</td><td>小票生成函数</td><td>先写每类 1 条</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">7</span><h2>B 第 7 件事：最后保命检查</h2></div>
+      <div class="card">
+        <div class="checklist">
+          <div class="check"><input id="b701" type="checkbox"><label for="b701">断网后打开 HTML，能玩。</label></div>
+          <div class="check"><input id="b702" type="checkbox"><label for="b702">没有外部图片链接。</label></div>
+          <div class="check"><input id="b703" type="checkbox"><label for="b703">没有 CDN、fetch、axios、WebSocket。</label></div>
+          <div class="check"><input id="b704" type="checkbox"><label for="b704">手机端按钮能点，不太小。</label></div>
+          <div class="check"><input id="b705" type="checkbox"><label for="b705">页面不横向溢出。</label></div>
+          <div class="check"><input id="b706" type="checkbox"><label for="b706">每个页面都有返回或下一步，不会卡死。</label></div>
+          <div class="check"><input id="b707" type="checkbox"><label for="b707">刷新页面不会白屏。</label></div>
+          <div class="check"><input id="b708" type="checkbox"><label for="b708">最终文件能打包提交。</label></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="notice">B 最重要的交付标准：就算 C 的图还没完全好，也能用临时素材完整玩一遍。作品先活，再变美。</div>
+  </section>
+
+  <section id="c" class="panel c-theme">
+    <div class="section-title"><span class="icon">C</span><h2>C 超详细任务：你不是“随便画图”，你是“做体验包装”</h2></div>
+    <div class="card">
+      <div class="person-head">
+        <div class="avatar">🎨</div>
+        <div>
+          <h3>C 的最终目标</h3>
+          <p><b>让这个作品一眼看起来完整、可爱、有记忆点，让小票文案真的能打动人。</b></p>
+          <span class="role-tag">C 的交付物 = 素材 + NPC 台词 + 小票文案 + 海报 + 截图/视频</span>
+        </div>
+      </div>
+    </div>
+
+    <section>
+      <div class="section-title"><span class="icon">1</span><h2>C 第 1 件事：先定视觉，不要乱画</h2></div>
+      <div class="card">
+        <p>推荐风格：蓝白色 + 奶油色 + 卡通洗衣房 + 小动物 NPC。</p>
+        <div class="pill-row">
+          <span class="pill">干净</span><span class="pill">治愈</span><span class="pill">轻松</span><span class="pill">一点幽默</span><span class="pill">不要高饱和刺眼</span>
+        </div>
+        <div class="checklist">
+          <div class="check"><input id="c101" type="checkbox"><label for="c101">确定主色：蓝白 / 奶油色。</label></div>
+          <div class="check"><input id="c102" type="checkbox"><label for="c102">确定 NPC：小羊 / 水獭 / 小狗 / 浣熊四选一。</label></div>
+          <div class="check"><input id="c103" type="checkbox"><label for="c103">给 B 一个简单参考图或配色。</label></div>
+          <div class="check"><input id="c104" type="checkbox"><label for="c104">确认素材大小，尽量用 PNG/WebP，文件别太大。</label></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">2</span><h2>C 第 2 件事：按优先级给素材</h2></div>
+      <div class="card">
+        <table>
+          <thead><tr><th>优先级</th><th>素材</th><th>文件名建议</th><th>交给 B 的时间</th></tr></thead>
+          <tbody>
+            <tr><td>最高</td><td>洗衣机</td><td>washer.png</td><td>越早越好，B 首页和清洗页都要用</td></tr>
+            <tr><td>最高</td><td>NPC 基础形象</td><td>npc.png</td><td>越早越好，先一张也行</td></tr>
+            <tr><td>高</td><td>普通衣服 + 5 类情绪衣服</td><td>cloth-anxiety.png 等</td><td>投衣页完成前给</td></tr>
+            <tr><td>高</td><td>小票样式</td><td>receipt-bg.png 或 CSS 参考</td><td>小票页完成前给</td></tr>
+            <tr><td>中</td><td>泡泡</td><td>bubble.png</td><td>没有也行，B 可用 CSS</td></tr>
+            <tr><td>低</td><td>晾衣绳、音效、多表情</td><td>clothesline.png 等</td><td>有时间再给</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">3</span><h2>C 第 3 件事：写 NPC 台词</h2></div>
+      <div class="card">
+        <p>原则：像朋友，不像心理医生；温柔但不要鸡汤；可以轻微幽默。</p>
+        <table>
+          <thead><tr><th>页面</th><th>台词示例</th></tr></thead>
+          <tbody>
+            <tr><td>首页</td><td>欢迎光临，今天有什么心事要洗一洗？ / 脏一点也没关系，洗衣房就是干这个的。</td></tr>
+            <tr><td>输入页</td><td>写一句就好，不用写得很完整。 / 你可以把它说得乱一点，我听得懂。</td></tr>
+            <tr><td>投衣页</td><td>收到，是一件有点皱的心事。 / 放进去吧，我会轻一点关门。</td></tr>
+            <tr><td>模式页</td><td>不同心事有不同洗法，选一个现在最舒服的。 / 不用选最正确的，选一个你愿意试试的。</td></tr>
+            <tr><td>清洗页</td><td>这些泡泡里有些话，可能不是事实。 / 点掉它们，不代表否认自己，只是给脑子腾点地方。</td></tr>
+            <tr><td>小票页</td><td>洗好啦，虽然没有全干，但已经轻了一点。 / 这张小票可以留着，下次低落时看看。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">4</span><h2>C 第 4 件事：写小票文案库</h2></div>
+      <div class="card">
+        <p>至少 5 类情绪 × 每类 3 条。给 B 时按分类给，不要混在一起。</p>
+        <div class="template">焦虑：
+1. 已从“我必须立刻做好”脱水为“我可以先做第一步”。
+2. 检测到过量预演未来，建议暂停脑内彩排。
+3. 这件焦虑衬衫不需要一次熨平，先把今天这一角抚平就好。
+
+愤怒：
+1. 已清除一部分“凭什么”污渍，保留必要的边界感。
+2. 这双愤怒袜子很烫，建议先晾 3 分钟再开口。
+3. 愤怒不是坏衣服，它可能只是在提醒你：这里不舒服。
+
+难过：
+1. 这件委屈毛衣不适合强力甩干，适合被轻轻抱一下。
+2. 已将“没人理解我”漂洗为“我需要一点陪伴”。
+3. 难过没有洗坏，它只是暂时还没干。
+
+疲惫：
+1. 检测到电量不足，请勿继续强行运转。
+2. 这件疲惫外套太重了，今天可以先挂起来。
+3. 已将“我不能停”清洗为“休息也是处理问题的一部分”。
+
+迷茫：
+1. 这条迷茫围巾暂时打结，但不是永远解不开。
+2. 已将“我不知道怎么办”漂洗为“我可以先选一个小方向”。
+3. 有些衣服需要晾一晚，有些答案也是。</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="icon">5</span><h2>C 第 5 件事：海报和展示材料</h2></div>
+      <div class="two-col">
+        <div class="card">
+          <h3>海报必须有</h3>
+          <div class="checklist">
+            <div class="check"><input id="c501" type="checkbox"><label for="c501">标题：《把今天洗一下》。</label></div>
+            <div class="check"><input id="c502" type="checkbox"><label for="c502">副标题：一个把坏情绪洗成纪念小票的情绪洗衣房。</label></div>
+            <div class="check"><input id="c503" type="checkbox"><label for="c503">玩法流程：写下心事 → 投入洗衣机 → 选择模式 → 点击泡泡 → 获得小票。</label></div>
+            <div class="check"><input id="c504" type="checkbox"><label for="c504">三条亮点：情绪具象化、洗衣仪式、小票反馈。</label></div>
+            <div class="check"><input id="c505" type="checkbox"><label for="c505">Demo 二维码。</label></div>
+            <div class="check"><input id="c506" type="checkbox"><label for="c506">真实 Demo 截图。</label></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>展示材料</h3>
+          <ul>
+            <li>截图 1：首页，展示洗衣房和 NPC。</li>
+            <li>截图 2：输入或投衣页，展示情绪变衣服。</li>
+            <li>截图 3：清洗小游戏，展示点击泡泡。</li>
+            <li>截图 4：小票页，展示情绪反馈。</li>
+            <li>演示视频：从首页完整玩到小票页，1 分钟左右即可。</li>
+          </ul>
+          <div class="danger">海报不要写没做出来的功能。比如收藏页没做完，就不要写“长期情绪档案管理”。</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="notice">C 最重要的交付标准：B 拿到你的素材和文案能直接放进页面；海报上的内容和真实 Demo 完全一致。</div>
+  </section>
+
+  <section id="timeline" class="panel">
+    <div class="section-title"><span class="icon">T</span><h2>时间线：现在开始每一步怎么走</h2></div>
+    <div class="phase">
+      <div class="phase-time">0:00-0:45<br>共同统一</div>
+      <div>
+        <h3>三个人一起，别分开</h3>
+        <ul>
+          <li><span class="owner all">全员</span> 定页面、情绪类型、洗涤模式、视觉风格。</li>
+          <li><span class="owner a">A</span> 主持，把讨论结果写到文档。</li>
+          <li><span class="owner b">B</span> 判断哪些技术来不及，提前降级。</li>
+          <li><span class="owner c">C</span> 确认素材风格和文件命名。</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-time">0:45-2:30<br>第一轮并行</div>
+      <div>
+        <h3>目标：粗 Demo 能走通</h3>
+        <ul>
+          <li><span class="owner a">A</span> 写页面说明卡、按钮逻辑表、情绪规则表。</li>
+          <li><span class="owner b">B</span> 建项目、做页面切换、保存输入、粗小票页。</li>
+          <li><span class="owner c">C</span> 给第一版洗衣机、NPC、衣服草图，写 NPC 台词。</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-time">2:30-2:50<br>第一次合并</div>
+      <div>
+        <h3>只检查大问题</h3>
+        <ul>
+          <li>A 检查 B 的页面顺序是否对。</li>
+          <li>B 告诉 A 哪些功能做起来会慢。</li>
+          <li>C 看素材尺寸是否能放进页面。</li>
+          <li>此时不要纠结颜色和细节。</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-time">2:50-5:30<br>第二轮并行</div>
+      <div>
+        <h3>目标：变成真的可玩</h3>
+        <ul>
+          <li><span class="owner a">A</span> 写项目介绍和讲解稿，准备评委问答。</li>
+          <li><span class="owner b">B</span> 做点击泡泡、小票生成、模式选择、离线检查。</li>
+          <li><span class="owner c">C</span> 替换正式素材，写小票文案，开始海报。</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-time">5:30-6:00<br>第二次合并</div>
+      <div>
+        <h3>开始砍功能</h3>
+        <ul>
+          <li>完整试玩一遍。</li>
+          <li>如果拖拽没做好，砍掉，保留点击投入。</li>
+          <li>如果衣柜页没做好，砍掉，保留小票截图。</li>
+          <li>海报只写已经稳定的功能。</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-time">最后 30 分钟<br>保命模式</div>
+      <div>
+        <h3>不加任何新功能</h3>
+        <ul>
+          <li><span class="owner a">A</span> 只检查错字、讲解稿、提交文档。</li>
+          <li><span class="owner b">B</span> 只修 bug、检查离线、打包。</li>
+          <li><span class="owner c">C</span> 只确认海报、二维码、截图。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="handoff" class="panel">
+    <div class="section-title"><span class="icon">🔁</span><h2>交接和防重叠：避免互相打架</h2></div>
+    <div class="card">
+      <h3>交接 1：A 给 B</h3>
+      <div class="handoff">
+        <div class="handoff-box">
+          <h3><span class="owner a">A</span> 交付</h3>
+          <ul>
+            <li>页面说明卡</li>
+            <li>按钮逻辑表</li>
+            <li>情绪关键词表</li>
+            <li>洗涤模式说明</li>
+          </ul>
+        </div>
+        <div class="arrow">→</div>
+        <div class="handoff-box">
+          <h3><span class="owner b">B</span> 接收后做</h3>
+          <ul>
+            <li>按页面搭 HTML</li>
+            <li>按按钮表写跳转</li>
+            <li>按关键词表写判断</li>
+            <li>按模式说明做卡片</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>交接 2：C 给 B</h3>
+      <div class="handoff">
+        <div class="handoff-box">
+          <h3><span class="owner c">C</span> 交付</h3>
+          <ul>
+            <li>素材文件</li>
+            <li>NPC 台词</li>
+            <li>小票文案库</li>
+            <li>海报截图需求</li>
+          </ul>
+        </div>
+        <div class="arrow">→</div>
+        <div class="handoff-box">
+          <h3><span class="owner b">B</span> 接收后做</h3>
+          <ul>
+            <li>放入 assets</li>
+            <li>替换页面占位图</li>
+            <li>把文案放入 JS 文案库</li>
+            <li>给 C 截真实 Demo 图</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>交接 3：B 给 A/C</h3>
+      <div class="handoff">
+        <div class="handoff-box">
+          <h3><span class="owner b">B</span> 交付</h3>
+          <ul>
+            <li>可试玩 Demo</li>
+            <li>真实截图</li>
+            <li>已完成/没完成的功能列表</li>
+            <li>二维码或体验路径</li>
+          </ul>
+        </div>
+        <div class="arrow">→</div>
+        <div class="handoff-box">
+          <h3><span class="owner a">A</span> / <span class="owner c">C</span> 接收后做</h3>
+          <ul>
+            <li>A 改讲解稿，别讲没做的功能</li>
+            <li>C 做海报，只放真实截图</li>
+            <li>一起检查提交材料</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <section>
+      <div class="section-title"><span class="icon">🚧</span><h2>冲突处理规则</h2></div>
+      <div class="card">
+        <table>
+          <thead><tr><th>冲突</th><th>谁说了算</th><th>处理方式</th></tr></thead>
+          <tbody>
+            <tr><td>A 想加新功能，B 说做不完</td><td>B 对技术可行性说了算</td><td>降级：拖拽改点击，收藏页改截图保存。</td></tr>
+            <tr><td>C 觉得页面不好看，想改布局</td><td>B 改代码，C 给意见</td><td>C 给参考图/标注，B 统一改 CSS。</td></tr>
+            <tr><td>B 发现 A 的规则不清楚</td><td>A 必须补规则</td><td>B 只问具体问题，比如“空输入去哪？”不要重新讨论大方向。</td></tr>
+            <tr><td>海报和 Demo 不一致</td><td>以 Demo 为准</td><td>删掉海报里没实现的功能。</td></tr>
+            <tr><td>最后 30 分钟还有功能没做完</td><td>全员砍功能</td><td>只保主线：输入、投衣、模式、泡泡、小票。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <section id="final" class="panel">
+    <div class="section-title"><span class="icon">✅</span><h2>最终检查：照着勾，不要靠感觉</h2></div>
+
+    <div class="three-col">
+      <div class="card a-theme">
+        <h3><span class="owner a">A</span> A 最终检查</h3>
+        <div class="checklist">
+          <div class="check"><input id="fa1" type="checkbox"><label for="fa1">我能用 30 秒讲清楚作品。</label></div>
+          <div class="check"><input id="fa2" type="checkbox"><label for="fa2">项目介绍文档包含痛点、方案、玩法、亮点、技术实现。</label></div>
+          <div class="check"><input id="fa3" type="checkbox"><label for="fa3">所有页面文案没有明显错字。</label></div>
+          <div class="check"><input id="fa4" type="checkbox"><label for="fa4">我知道每个页面为什么存在。</label></div>
+          <div class="check"><input id="fa5" type="checkbox"><label for="fa5">我不会在讲解里说 Demo 没做出来的功能。</label></div>
+        </div>
+      </div>
+
+      <div class="card b-theme">
+        <h3><span class="owner b">B</span> B 最终检查</h3>
+        <div class="checklist">
+          <div class="check"><input id="fb1" type="checkbox"><label for="fb1">断网能打开。</label></div>
+          <div class="check"><input id="fb2" type="checkbox"><label for="fb2">首页到小票页完整可玩。</label></div>
+          <div class="check"><input id="fb3" type="checkbox"><label for="fb3">手机端能点，不横向溢出。</label></div>
+          <div class="check"><input id="fb4" type="checkbox"><label for="fb4">没有外链、CDN、网络请求。</label></div>
+          <div class="check"><input id="fb5" type="checkbox"><label for="fb5">最终代码包已准备。</label></div>
+        </div>
+      </div>
+
+      <div class="card c-theme">
+        <h3><span class="owner c">C</span> C 最终检查</h3>
+        <div class="checklist">
+          <div class="check"><input id="fc1" type="checkbox"><label for="fc1">海报 PDF 已完成。</label></div>
+          <div class="check"><input id="fc2" type="checkbox"><label for="fc2">二维码能扫。</label></div>
+          <div class="check"><input id="fc3" type="checkbox"><label for="fc3">海报截图来自真实 Demo。</label></div>
+          <div class="check"><input id="fc4" type="checkbox"><label for="fc4">小票文案已经放进 Demo。</label></div>
+          <div class="check"><input id="fc5" type="checkbox"><label for="fc5">演示视频能正常播放。</label></div>
+        </div>
+      </div>
+    </div>
+
+    <section>
+      <div class="section-title"><span class="icon">🧯</span><h2>时间不够时，按这个砍</h2></div>
+      <div class="card">
+        <table>
+          <thead><tr><th>功能</th><th>处理</th><th>原因</th></tr></thead>
+          <tbody>
+            <tr><td>输入 → 投衣 → 模式 → 清洗 → 小票</td><td>必须保留</td><td>这是作品主线，不能断。</td></tr>
+            <tr><td>点击泡泡</td><td>尽量保留</td><td>这是最关键互动。</td></tr>
+            <tr><td>NPC 台词</td><td>尽量保留</td><td>提升亲和力。</td></tr>
+            <tr><td>拖拽投衣</td><td>可以砍</td><td>点击投入已经足够，拖拽易出 bug。</td></tr>
+            <tr><td>衣柜收藏页</td><td>可以砍</td><td>有小票页即可展示核心价值。</td></tr>
+            <tr><td>音效、多表情、隐藏结局</td><td>最后再做</td><td>加分项，不影响主线。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <div class="footer">《把今天洗一下》三人分工执行手册 V2 ｜ 勾选项会自动保存在本浏览器 localStorage</div>
+</main>
+
+<script>
+  const buttons = document.querySelectorAll(".tab-btn[data-tab]");
+  const panels = document.querySelectorAll(".panel");
+  buttons.forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      buttons.forEach(b=>b.classList.remove("active"));
+      panels.forEach(p=>p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.tab).classList.add("active");
+      window.scrollTo({top:0,behavior:"smooth"});
+    });
+  });
+
+  const checks = document.querySelectorAll('input[type="checkbox"]');
+  checks.forEach(item=>{
+    const saved = localStorage.getItem("laundry-v2-"+item.id);
+    if(saved==="1") item.checked = true;
+    item.addEventListener("change",()=>{
+      localStorage.setItem("laundry-v2-"+item.id,item.checked?"1":"0");
+    });
+  });
+</script>
+</body>
+</html>
