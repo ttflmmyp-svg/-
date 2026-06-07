@@ -1423,6 +1423,125 @@ async function saveReceiptImage() {
   setTimeout(() => toast.classList.remove("show"), 3000);
 }
 
+let receiptPreviewUrl = "";
+
+function showReceiptToast(message) {
+  const toast = document.getElementById("receiptToast");
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 3000);
+}
+
+async function createReceiptImageBlob() {
+  if (!gameState.receipt) return null;
+  const bg = document.getElementById("receiptBg");
+  if (!bg?.currentSrc) return null;
+  const backgroundResponse = await fetch(bg.currentSrc, { cache: "no-store" });
+  const backgroundBlob = await backgroundResponse.blob();
+  const backgroundDataUrl = await new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.readAsDataURL(backgroundBlob);
+  });
+  const backgroundImage = await new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = backgroundDataUrl;
+  });
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 941;
+  canvas.height = 1672;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#1f2937";
+  ctx.font = "bold 48px Microsoft YaHei, sans-serif";
+  ctx.fillText(gameState.receipt.title, 470, 520);
+
+  ctx.fillStyle = "#374151";
+  ctx.font = "bold 42px Microsoft YaHei, sans-serif";
+  wrapCanvasText(ctx, gameState.receipt.result, 470, 640, 500, 62);
+
+  ctx.fillStyle = "#315b7d";
+  ctx.font = "bold 28px Microsoft YaHei, sans-serif";
+  ctx.fillText(`${gameState.receipt.emotion} / ${gameState.receipt.cloth} / ${gameState.receipt.cleanIndex}`, 470, 930);
+
+  ctx.fillStyle = "#6b7280";
+  ctx.font = "24px Microsoft YaHei, sans-serif";
+  wrapCanvasText(ctx, gameState.receipt.source, 470, 1000, 500, 38);
+
+  return new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+}
+
+function showReceiptPreview(blob, message = "长按图片保存或分享") {
+  if (!blob) return;
+  const sheet = document.getElementById("receiptShareSheet");
+  const preview = document.getElementById("receiptSharePreview");
+  const hint = document.getElementById("receiptShareHint");
+  if (!sheet || !preview) return;
+
+  if (receiptPreviewUrl) URL.revokeObjectURL(receiptPreviewUrl);
+  receiptPreviewUrl = URL.createObjectURL(blob);
+  preview.src = receiptPreviewUrl;
+  if (hint) hint.textContent = message;
+  sheet.hidden = false;
+}
+
+function closeReceiptPreview() {
+  const sheet = document.getElementById("receiptShareSheet");
+  const preview = document.getElementById("receiptSharePreview");
+  if (sheet) sheet.hidden = true;
+  if (preview) preview.removeAttribute("src");
+  if (receiptPreviewUrl) {
+    URL.revokeObjectURL(receiptPreviewUrl);
+    receiptPreviewUrl = "";
+  }
+}
+
+async function shareReceiptImage() {
+  if (!gameState.receipt) return;
+  storeReceipt();
+  const blob = await createReceiptImageBlob();
+  if (!blob) return;
+
+  const file = new File([blob], `emotion-laundry-receipt-${Date.now()}.png`, { type: "image/png" });
+  if (navigator.canShare?.({ files: [file] }) && navigator.share) {
+    try {
+      await navigator.share({
+        title: "情绪洗衣小票",
+        text: "我的情绪洗衣小票洗好了。",
+        files: [file]
+      });
+      showReceiptToast("已打开分享面板。");
+      return;
+    } catch (error) {
+      if (error?.name === "AbortError") return;
+    }
+  }
+
+  showReceiptPreview(blob, "当前浏览器不支持直接分享图片，长按图片保存或转发");
+}
+
+async function saveReceiptImageEnhanced() {
+  if (!gameState.receipt) return;
+  storeReceipt();
+  const blob = await createReceiptImageBlob();
+  if (!blob) return;
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `emotion-laundry-receipt-${Date.now()}.png`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  showReceiptToast("小票已生成，正在保存。");
+}
+
 function showCleanResult() {
   const rule = gameState.analysis || fallbackRule;
   const cleanImage = document.getElementById("cleanClothImage");
@@ -1814,7 +1933,13 @@ if (dryingCloth) {
 }
 
 packReceiptBtn.addEventListener("click", beginDryingBeforeReceipt);
-document.getElementById("saveReceiptBtn").addEventListener("click", saveReceiptImage);
+document.getElementById("saveReceiptBtn").addEventListener("click", saveReceiptImageEnhanced);
+document.getElementById("saveReceiptInlineBtn")?.addEventListener("click", saveReceiptImageEnhanced);
+document.getElementById("shareReceiptBtn")?.addEventListener("click", shareReceiptImage);
+document.getElementById("closeReceiptShareBtn")?.addEventListener("click", closeReceiptPreview);
+document.getElementById("receiptShareSheet")?.addEventListener("click", event => {
+  if (event.target === event.currentTarget) closeReceiptPreview();
+});
 
 document.getElementById("restartBtn").addEventListener("click", () => {
   emotionInput.value = "";

@@ -1354,9 +1354,19 @@ body {
   border-radius: 50%;
   background: rgba(255, 252, 242, .8);
   color: #4d4450;
-  font-size: clamp(30px, 9vw, 42px);
-  font-weight: 900;
+  font-size: 0;
+  line-height: 1;
   backdrop-filter: blur(8px);
+}
+
+.room-back::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-top: clamp(7px, 2.1vw, 9px) solid transparent;
+  border-bottom: clamp(7px, 2.1vw, 9px) solid transparent;
+  border-right: clamp(10px, 3vw, 13px) solid currentColor;
+  transform: translateX(-8%);
 }
 
 .room-stage {
