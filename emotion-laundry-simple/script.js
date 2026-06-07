@@ -451,11 +451,9 @@ let coachTimer = null;
 let stageMeter = null;
 let stageMeterFill = null;
 let stageMeterLabel = null;
-let stageMotionButton = null;
 let washerPointerActive = false;
-let washerMotionActive = false;
-let lastWasherMotion = null;
-let lastWasherOrientation = null;
+let bubbleRevealTimers = [];
+const WASHER_DRUM_PROGRESS_SCALE = 0.7;
 
 function haptic(pattern = 18) {
   if (navigator.vibrate) navigator.vibrate(pattern);
@@ -485,12 +483,9 @@ function ensureStageMeter() {
       <span>点按或滑动滚筒</span>
     </div>
     <div class="stage-meter-track"><span></span></div>
-    <button class="stage-motion-button" type="button">摇一摇</button>
   `;
   stageMeterFill = stageMeter.querySelector(".stage-meter-track span");
   stageMeterLabel = stageMeter.querySelector(".stage-meter-copy span");
-  stageMotionButton = stageMeter.querySelector(".stage-motion-button");
-  stageMotionButton.addEventListener("click", startWasherMotionMode);
   roomStage.appendChild(stageMeter);
 }
 
@@ -504,103 +499,6 @@ function updateStageMeter(value = gameState.drum, label = "点按或滑动滚筒
 function setStageMeterVisible(visible) {
   ensureStageMeter();
   stageMeter.classList.toggle("show", visible);
-}
-
-function stopWasherMotionMode() {
-  if (!washerMotionActive) return;
-  washerMotionActive = false;
-  lastWasherMotion = null;
-  lastWasherOrientation = null;
-  window.removeEventListener("devicemotion", handleWasherMotion);
-  window.removeEventListener("deviceorientation", handleWasherOrientation);
-  if (stageMotionButton) {
-    stageMotionButton.classList.remove("active");
-    stageMotionButton.textContent = "摇一摇";
-  }
-}
-
-async function startWasherMotionMode() {
-  if (gameState.roomStep !== "washer" || gameState.drumReady) return;
-
-  try {
-    if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
-      const permission = await DeviceMotionEvent.requestPermission();
-      if (permission !== "granted") {
-        showCoach("没有获得动作传感器权限，先用点按/滑动也可以");
-        return;
-      }
-    }
-
-    if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
-      await DeviceOrientationEvent.requestPermission().catch(() => "denied");
-    }
-
-    washerMotionActive = true;
-    lastWasherMotion = null;
-    lastWasherOrientation = null;
-    window.addEventListener("devicemotion", handleWasherMotion, { passive: true });
-    window.addEventListener("deviceorientation", handleWasherOrientation, { passive: true });
-    if (stageMotionButton) {
-      stageMotionButton.classList.add("active");
-      stageMotionButton.textContent = "摇动中";
-    }
-    showCoach("摇动手机，滚筒会跟着加速");
-  } catch (error) {
-    showCoach("当前浏览器不支持陀螺仪，先用点按/滑动");
-  }
-}
-
-function handleWasherMotion(event) {
-  if (!washerMotionActive || gameState.roomStep !== "washer" || gameState.drumReady) return;
-  const source = event.accelerationIncludingGravity || event.acceleration;
-  if (!source) return;
-
-  const current = {
-    x: source.x || 0,
-    y: source.y || 0,
-    z: source.z || 0
-  };
-
-  if (!lastWasherMotion) {
-    lastWasherMotion = current;
-    return;
-  }
-
-  const delta =
-    Math.abs(current.x - lastWasherMotion.x) +
-    Math.abs(current.y - lastWasherMotion.y) +
-    Math.abs(current.z - lastWasherMotion.z);
-
-  lastWasherMotion = current;
-
-  if (delta > 4.8) {
-    addWasherDrumProgress(Math.min(7.5, (delta - 4.2) * 0.42));
-  }
-}
-
-function handleWasherOrientation(event) {
-  if (!washerMotionActive || gameState.roomStep !== "washer" || gameState.drumReady) return;
-  const current = {
-    alpha: event.alpha || 0,
-    beta: event.beta || 0,
-    gamma: event.gamma || 0
-  };
-
-  if (!lastWasherOrientation) {
-    lastWasherOrientation = current;
-    return;
-  }
-
-  const delta =
-    Math.abs(current.alpha - lastWasherOrientation.alpha) * 0.12 +
-    Math.abs(current.beta - lastWasherOrientation.beta) +
-    Math.abs(current.gamma - lastWasherOrientation.gamma);
-
-  lastWasherOrientation = current;
-
-  if (delta > 9) {
-    addWasherDrumProgress(Math.min(5.5, (delta - 8) * 0.22));
-  }
 }
 
 function preloadWasherDrumFrames() {
@@ -681,19 +579,17 @@ function setRoomStep(step) {
     npcLine.textContent = "点点脏衣篓，把今天放进去。";
   }
   if (step === "basket") {
-    npcLine.textContent = "不用整理得很漂亮，乱糟糟也可以放进来。";
+    npcLine.textContent = "不用整理得很漂亮，乱糟糟也能放进来";
   }
   if (step === "cloth") {
-    npcLine.textContent = "这件衣服准备好了，送去洗衣机吧。";
+    npcLine.textContent = "小衣服已经带着心事来了，接下来交给泡泡照顾吧。";
   }
   if (step === "washer") {
     npcLine.textContent = "点按或滑动滚筒，让这件心事先转起来。";
     updateStageMeter(gameState.drum, "点按或滑动滚筒");
     setStageMeterVisible(true);
-    showCoach("先让滚筒转满，再倒洗涤剂");
   } else {
     setStageMeterVisible(false);
-    stopWasherMotionMode();
   }
   if (step === "detergent") {
     npcLine.textContent = "洗涤剂准备好了，点一下瓶子开始倒入。";
@@ -740,7 +636,8 @@ function resetWashProgress() {
   gameState.apiStatus = "idle";
   gameState.apiResult = null;
   gameState.drumReady = false;
-  stopWasherMotionMode();
+  bubbleRevealTimers.forEach(timer => window.clearTimeout(timer));
+  bubbleRevealTimers = [];
   roomShell.classList.remove("show-clean-result", "show-recompose", "show-drying", "micro-complete", "cloth-inside-ready", "pouring-detergent", "detergent-target-hot", "detergent-poured");
   const soapMeter = document.getElementById("soapMeter");
   const spinMeter = document.getElementById("spinMeter");
@@ -931,13 +828,15 @@ function startMicroBubbles() {
   const thoughtSet = getMicroThoughtSet();
   gameState.poppedBubbles = 0;
   gameState.microCards = buildAdaptiveBubbleCards(thoughtSet);
+  bubbleRevealTimers.forEach(timer => window.clearTimeout(timer));
+  bubbleRevealTimers = [];
   roomShell.classList.remove("micro-complete", "show-recompose", "show-clean-result");
   microBubbleField.innerHTML = "";
 
-  gameState.microCards.forEach(card => {
+  gameState.microCards.forEach((card, index) => {
     const preset = bubblePresets[card.type];
     const button = document.createElement("button");
-    button.className = "micro-bubble";
+    button.className = "micro-bubble is-waiting";
     button.type = "button";
     button.dataset.state = "idle";
     button.dataset.id = card.id;
@@ -951,6 +850,7 @@ function startMicroBubbles() {
     button.innerHTML = `
       <img class="bubble-image" src="${preset.idle}" alt="">
       <span class="micro-card-face harsh">${card.harsh}</span>
+      <span class="micro-card-face gentle">${card.gentle}</span>
     `;
     const image = button.querySelector(".bubble-image");
     button.addEventListener("pointerdown", () => pressMicroBubble(button, image, card));
@@ -958,6 +858,11 @@ function startMicroBubbles() {
     button.addEventListener("pointerup", () => popMicroBubble(button, image, card));
     button.addEventListener("click", event => event.preventDefault());
     microBubbleField.appendChild(button);
+    const revealTimer = window.setTimeout(() => {
+      button.classList.remove("is-waiting");
+      button.classList.add("is-visible");
+    }, index * 480);
+    bubbleRevealTimers.push(revealTimer);
   });
 
   setPanel("microBubble");
@@ -985,12 +890,14 @@ function popMicroBubble(button, image, card) {
   npcLine.textContent = `“${card.harsh}”被戳破了。`;
 
   playBubblePopFrames(image, () => {
-    button.dataset.state = "gone";
+    button.dataset.state = "soothed";
     button.classList.remove("is-popping");
-    button.classList.add("is-gone");
+    button.classList.add("is-soothed");
     gameState.poppedBubbles += 1;
     if (gameState.poppedBubbles >= gameState.microCards.length) {
-      setTimeout(completeMicroBubbles, 520);
+      npcLine.textContent = "这些刺人的话轻了一点，先看看留下来的温柔。";
+      showCoach("这句话轻了一点", 1400);
+      setTimeout(completeMicroBubbles, 3000);
     }
   });
 }
@@ -1032,7 +939,7 @@ function playBubblePopFrames(image, onComplete) {
 function completeMicroBubbles() {
   roomShell.classList.add("micro-complete");
   microFlash.classList.add("flash");
-  npcLine.textContent = "泡泡洗掉了，正在打印今天的小票。";
+  npcLine.textContent = "泡泡接住了这件心事，可以去晾一晾了。";
   setTimeout(() => {
     microFlash.classList.remove("flash");
     beginDryingBeforeReceipt();
@@ -1167,8 +1074,9 @@ function hangDryingCloth() {
   slot.append(leftClip, rightClip, hung);
   dryingHungLayer.appendChild(slot);
   dryingSparkles.classList.add("show");
+  showCoach("晾好了，去收下今天的小票吧", 1800);
 
-  setTimeout(finishDrying, 650);
+  setTimeout(finishDrying, 1800);
 }
 
 function finishDrying() {
@@ -1657,7 +1565,6 @@ function sendClothToWasher() {
   setTimeout(() => {
     roomShell.classList.add("cloth-inside-ready");
     miniCloth.classList.remove("visible");
-    showCoach("点按滚筒，或者在滚筒上来回滑动");
   }, 680);
   updateStageMeter(0, "点按或滑动滚筒");
 }
@@ -1667,15 +1574,14 @@ washerHotspot.addEventListener("click", sendClothToWasher);
 
 function addWasherDrumProgress(amount) {
   if (gameState.roomStep !== "washer" || gameState.drumReady) return;
-  gameState.drum = Math.min(100, gameState.drum + amount);
+  gameState.drum = Math.min(100, gameState.drum + amount * WASHER_DRUM_PROGRESS_SCALE);
   updateStageMeter(gameState.drum, gameState.drum >= 100 ? "可以倒洗涤剂了" : "继续，让它转起来");
   haptic(8);
   if (gameState.drum >= 100) {
     gameState.drumReady = true;
-    stopWasherMotionMode();
     npcLine.textContent = "滚筒热起来了，现在把洗涤剂倒进去。";
-    showCoach("滚筒准备好了，去拖动洗涤剂瓶");
-    setTimeout(() => setPanel("detergent"), 420);
+    showCoach("滚筒暖起来了", 1400);
+    setTimeout(() => setPanel("detergent"), 650);
   }
 }
 
@@ -1745,7 +1651,7 @@ function playDetergentFrames(rule) {
       return;
     }
     detergentPourFrame.src = detergentPourFrameAsset(rule.detergentKey, frameIndex);
-  }, 260);
+  }, 350);
 }
 
 function pourDetergent(event) {
@@ -1761,11 +1667,11 @@ function pourDetergent(event) {
   setTimeout(() => {
     roomShell.classList.remove("pouring-detergent");
     roomShell.classList.add("detergent-poured");
-  }, 1650);
+  }, 2250);
   setTimeout(() => {
     roomShell.classList.remove("detergent-poured");
     startMicroBubbles();
-  }, 2100);
+  }, 2800);
 }
 
 function startDetergentDrag(event) {
